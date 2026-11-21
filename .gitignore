@@ -7,3 +7,11 @@ coverage/
 .env.*
 .DS_Store
 *.tsbuildinfo
+
+# Signing secrets — never commit (this repo is public)
+*.jks
+*.keystore
+keystore.properties
+*.p8
+*.p12
+*.mobileprovision
