@@ -331,7 +331,7 @@ describe('interruption (page hidden mid-run)', () => {
     const { clock, engine, log } = harness();
     engine.start();
     clock.advance(10_000);
-    clock.sleep(5_000); // tab hidden: no frames for 5s
+    clock.sleep(10_000); // tab hidden: no frames for 10s
     clock.frame(); // first frame on return
 
     expect(engine.wasInterrupted).toBe(true);
@@ -369,6 +369,19 @@ describe('interruption (page hidden mid-run)', () => {
     expect(engine.wasInterrupted).toBe(false);
     expect(log.phases.at(-1)).toMatchObject({ phaseIndex: 0, reason: 'restart', startedAt: clock.time });
     expect(engine.getState()).toMatchObject({ status: 'running', phaseIndex: 0, phaseElapsedMs: 0 });
+  });
+
+  it('default threshold tolerates a visible-page stall of a couple of seconds (slow phone, first load)', () => {
+    const { clock, engine } = harness();
+    engine.start();
+    clock.advance(500);
+    clock.sleep(1_650); // the stall seen in the browser right after first load
+    clock.frame();
+    clock.advance(1_000);
+    clock.sleep(3_000);
+    clock.frame();
+    expect(engine.wasInterrupted).toBe(false);
+    expect(engine.getState()).toMatchObject({ status: 'running', phaseElapsedMs: 6_150 });
   });
 
   it('ordinary frame jank below the threshold does not interrupt', () => {

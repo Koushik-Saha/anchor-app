@@ -82,7 +82,7 @@ export interface EngineOptions {
   now?: () => number;
   /** Default: requestAnimationFrame (setTimeout ~60fps where unavailable). */
   scheduler?: FrameScheduler;
-  /** A gap between frames longer than this counts as an interruption. Default 1000ms. */
+  /** A gap between frames longer than this counts as an interruption. Default 5000ms. */
   interruptThresholdMs?: number;
   /** Called when a listener throws. Default: rethrow asynchronously so the run is never broken. */
   onListenerError?: (error: unknown) => void;
@@ -107,7 +107,14 @@ export interface ResetEngine {
   dispose(): void;
 }
 
-export const DEFAULT_INTERRUPT_THRESHOLD_MS = 1_000;
+/**
+ * Frame gaps longer than this count as an interruption. Deliberately generous:
+ * a hidden page is caught immediately by the UI calling interrupt() on
+ * visibilitychange; this is only the fallback for a device that slept with JS
+ * frozen (many seconds). Visible-page stalls of 1–2s happen on slow phones and
+ * must NOT be mistaken for the user leaving.
+ */
+export const DEFAULT_INTERRUPT_THRESHOLD_MS = 5_000;
 
 // ─── Defaults ────────────────────────────────────────────────────────────────
 

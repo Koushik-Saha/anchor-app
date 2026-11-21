@@ -8,19 +8,20 @@ import { CalmButton } from '../components/CalmButton';
 import { cx, focusRing } from '../components/cx';
 import { ProgressDots } from '../components/ProgressDots';
 import { cueText } from '../content/cueText';
-import { defaultProtocol } from '../content/protocols';
+import { defaultProtocol, getProtocol, type ProtocolId } from '../content/protocols';
 import { createResetEngine, cueAt, type BreathPart, type ResetEngine } from '../engine';
 import * as audio from '../platform/audio';
 import * as haptics from '../platform/haptics';
+import { storage } from '../platform/storage';
 import * as wakeLock from '../platform/wakeLock';
 
 // Reset-flow rules (CLAUDE.md 7): ≤ 8 words on screen, every tap target ≥ 64px,
 // Skip and ✕ always visible, no popups, no guilt.
-export function Reset() {
+export function Reset({ protocolId }: { protocolId: ProtocolId }) {
   const { navigate } = useNavigation();
   const { settings } = useSettings();
   const reducedMotion = usePrefersReducedMotion();
-  const protocol = defaultProtocol;
+  const protocol = getProtocol(protocolId) ?? defaultProtocol;
 
   const circleRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<ResetEngine | null>(null);
@@ -80,7 +81,10 @@ export function Reset() {
 
       onComplete() {
         haptics.pulse('done');
-        live.current.navigate('done');
+        // Saved now, so the run is in history even if "What helped?" is never answered.
+        const completedAt = new Date().toISOString();
+        void storage.addHistoryEntry({ at: completedAt, protocolId, completed: true });
+        live.current.navigate({ view: 'done', protocolId, completedAt });
       },
     });
 
@@ -100,11 +104,17 @@ export function Reset() {
       engineRef.current = null;
       void wakeLock.release();
     };
-  }, [protocol]);
+  }, [protocol, protocolId]);
 
   const skip = () => engineRef.current?.skipPhase();
+  // No confirmation, no "are you sure" — leaving is always fine.
   const close = () => {
-    engineRef.current?.abort();
+    const engine = engineRef.current;
+    const status = engine?.getState().status;
+    if (engine && (status === 'running' || status === 'paused')) {
+      engine.abort();
+      void storage.addHistoryEntry({ at: new Date().toISOString(), protocolId, completed: false });
+    }
     navigate('home');
   };
 

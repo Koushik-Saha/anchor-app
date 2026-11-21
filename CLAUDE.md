@@ -47,7 +47,7 @@ CI (`.github/workflows/ci.yml`) runs typecheck → lint → test → build → s
 - `src/engine` — reset state machine + protocol types. Pure TypeScript: no React, no platform, no Capacitor (lint-enforced). Every module here gets tests (write them first).
   - `createResetEngine(protocol, { now, scheduler })` → `start/pause/resume/restart/skipPhase/abort/interrupt/dispose`, `subscribe({ onPhaseChange, onTick, onComplete, onStateChange })`, `getState()`, `wasInterrupted`.
   - Timing is `clock() - phaseStartedAt` (monotonic), never summed frame deltas; boundaries carry overshoot. Don't add setInterval/setTimeout timing.
-  - Interruption contract: a frame gap > 1s pauses with `wasInterrupted = true`; the UI must also call `engine.interrupt()` on `visibilitychange` → hidden, and offer Resume / Restart when `wasInterrupted`.
+  - Interruption contract: the UI calls `engine.interrupt()` on `visibilitychange` → hidden (primary); a frame gap > 5s (device slept) also pauses with `wasInterrupted = true` (fallback — keep it generous, visible-page stalls of 1–2s are normal), and offer Resume / Restart when `wasInterrupted`.
   - Tests use a fake clock + fake frame scheduler (see `resetEngine.test.ts`) — never real timers.
 - `src/content` — protocol definitions as typed data. New protocol = new data, never new engine code. `protocols.test.ts` validates everything shipped.
 - `src/platform` — the only place that touches device APIs: `storage.ts`, `haptics.ts`, `audio.ts`, `wakeLock.ts`. Each must work on web and no-op safely where unsupported, and never throw. Pattern for every adapter:

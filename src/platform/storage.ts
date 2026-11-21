@@ -156,6 +156,11 @@ export interface AppStorage {
   /** Oldest first. */
   getHistory(): Promise<HistoryEntry[]>;
   addHistoryEntry(entry: HistoryEntry): Promise<boolean>;
+  /**
+   * Records "what helped" on the completed run saved at `at`. Resolves false if
+   * there is no such completed run (aborted runs never get `helped`) or the write failed.
+   */
+  setHistoryHelped(at: string, helped: Helped): Promise<boolean>;
   clearHistory(): Promise<void>;
 
   isUnlocked(): Promise<boolean>;
@@ -198,6 +203,15 @@ export function createStorage(backend: StorageBackend): AppStorage {
 
   const getHistory = async () => normalizeHistory(await getJSON('history'));
 
+  // History changes are read-modify-write: run them one at a time so a quick
+  // "what helped" tap can never race the entry it updates.
+  let historyQueue: Promise<unknown> = Promise.resolve();
+  const inHistoryQueue = <T>(task: () => Promise<T>): Promise<T> => {
+    const run = historyQueue.then(task, task);
+    historyQueue = run.catch(() => undefined);
+    return run;
+  };
+
   return {
     getJSON,
     setJSON,
@@ -210,11 +224,24 @@ export function createStorage(backend: StorageBackend): AppStorage {
     saveSettings: (settings) => setJSON('settings', settings),
 
     getHistory,
-    async addHistoryEntry(entry) {
-      const history = await getHistory();
-      return setJSON('history', [...history, entry].slice(-MAX_HISTORY));
-    },
-    clearHistory: () => remove('history'),
+    addHistoryEntry: (entry) =>
+      inHistoryQueue(async () => {
+        const history = await getHistory();
+        return setJSON('history', [...history, entry].slice(-MAX_HISTORY));
+      }),
+    setHistoryHelped: (at, helped) =>
+      inHistoryQueue(async () => {
+        const history = await getHistory();
+        for (let i = history.length - 1; i >= 0; i--) {
+          const entry = history[i];
+          if (entry?.at !== at) continue;
+          if (!entry.completed) return false;
+          history[i] = { ...entry, helped };
+          return setJSON('history', history);
+        }
+        return false;
+      }),
+    clearHistory: () => inHistoryQueue(() => remove('history')),
 
     isUnlocked: async () => (await getJSON('unlocked')) === true,
     setUnlocked: (unlocked) => setJSON('unlocked', unlocked),

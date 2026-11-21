@@ -4,6 +4,7 @@ import { BreathMark } from '../components/BreathMark';
 import { CalmButton } from '../components/CalmButton';
 import { CrisisLine } from '../components/CrisisLine';
 import { Screen } from '../components/Screen';
+import { DEFAULT_PROTOCOL_ID } from '../content/protocols';
 import * as audio from '../platform/audio';
 
 export function Home() {
@@ -18,8 +19,9 @@ export function Home() {
 
       <BigButton
         onClick={() => {
+          // One tap from app open to a running reset.
           audio.prime(); // this tap unlocks sound for the reset's timed tones (iOS)
-          navigate('reset');
+          navigate({ view: 'reset', protocolId: DEFAULT_PROTOCOL_ID });
         }}
         className="h-[40dvh] flex-col rounded-[2.5rem] text-3xl"
       >
