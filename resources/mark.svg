@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- The Anchor mark alone (half-filled circle, teal), transparent background. Source for splash art. -->
+  <circle cx="256" cy="256" r="148" fill="none" stroke="#5EEAD4" stroke-width="24"/>
+  <path d="M256 108a148 148 0 0 1 0 296z" fill="#5EEAD4"/>
+</svg>

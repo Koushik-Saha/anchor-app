@@ -81,4 +81,7 @@ CI (`.github/workflows/ci.yml`) runs typecheck → lint → test → build → s
 - Use system fonts only. The breathing circle is the only animation. `prefers-reduced-motion` is handled globally in `index.css`; still gate any motion with `motion-safe:`.
 - Size things in rem (Tailwind defaults, `min-h-tap`) so the Large text setting (root font-size 125%) scales them. Avoid px except for layout caps like the 480px column.
 - Exit/skip must always be visible in the reset flow; no popups, upsells, or permission prompts during a reset.
-- Capacitor packages are installed but native platforms are **not** initialised yet (no `capacitor.config.ts`, no `ios/` / `android/`). Don't run `cap init` / `cap add` unless asked.
+- Native apps: Capacitor 8, `capacitor.config.ts`, projects in `ios/` (SPM) and `android/`. After any web change: `npm run build && npx cap sync`. Build/run steps + device checklist: `docs/native.md`.
+- Native adapters (`src/platform/nativeAdapters.ts`: Preferences, Haptics, KeepAwake, App deep links) are loaded only via dynamic import when `isNative()` — never import Capacitor plugins anywhere else, so the web bundle stays plugin-free.
+- Permissions: none at runtime. Android: INTERNET removed in the manifest; only VIBRATE (from @capacitor/haptics). iOS: no `*UsageDescription` keys. Never add a plugin that needs more without asking.
+- The service worker is registered from `src/platform/serviceWorker.ts` on the web only, never inside the native apps.

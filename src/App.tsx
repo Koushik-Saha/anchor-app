@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
+import { routeFromUrl } from './app/launch';
 import { NavigationContext, type Navigation, type Route } from './app/navigation';
+import * as deepLinks from './platform/deepLinks';
 import { Done } from './screens/Done';
 import { History } from './screens/History';
 import { Home } from './screens/Home';
@@ -35,6 +37,17 @@ export function App({ initialRoute = { view: 'home' } }: { initialRoute?: Route 
   }, []);
 
   const nav = useMemo(() => ({ route, navigate }), [route, navigate]);
+
+  // anchor://start while the app is already open (Android shortcut, Shortcuts app, link):
+  // jump into a reset — unless one is already running, which is never interrupted.
+  useEffect(
+    () =>
+      deepLinks.onOpenUrl((url) => {
+        const next = routeFromUrl(url);
+        if (next) setRoute((current) => (current.view === 'reset' ? current : next));
+      }),
+    [],
+  );
 
   // Each view starts at the top, like a fresh screen.
   useEffect(() => {

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Anchor design tokens (CLAUDE.md rule 7) -->
+    <color name="anchor_slate">#0F172A</color>
+    <color name="anchor_surface">#1E293B</color>
+    <color name="anchor_teal">#5EEAD4</color>
+    <color name="colorPrimary">#0F172A</color>
+    <color name="colorPrimaryDark">#0F172A</color>
+    <color name="colorAccent">#5EEAD4</color>
+</resources>

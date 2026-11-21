@@ -12,7 +12,8 @@ export default defineConfig({
     VitePWA({
       // New versions install in the background and take over on the next launch.
       registerType: 'autoUpdate',
-      injectRegister: 'script-defer',
+      // Registered from main.tsx on the web only (src/platform/serviceWorker.ts) — never inside the native apps.
+      injectRegister: null,
       // Icon PNGs come from scripts/generate-icons.sh; globPatterns below precaches all of public/.
       includeManifestIcons: false, // already covered by globPatterns (avoids duplicate precache entries)
       manifest: {

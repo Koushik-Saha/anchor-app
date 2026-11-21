@@ -26,10 +26,10 @@ const deviceProperties = [
   { object: 'navigator', property: 'vibrate', message: PLATFORM_MSG },
   { object: 'navigator', property: 'wakeLock', message: PLATFORM_MSG },
 ];
-const capacitorImports = { group: ['@capacitor/*'], message: PLATFORM_MSG };
+const capacitorImports = { group: ['@capacitor/*', '@capacitor-community/*'], message: PLATFORM_MSG };
 
 export default defineConfig(
-  { ignores: ['dist', 'dev-dist', 'coverage', 'node_modules'] },
+  { ignores: ['dist', 'dev-dist', 'coverage', 'node_modules', 'android', 'ios'] }, // native projects hold copied build output
   {
     files: ['**/*.{js,mjs}'],
     extends: [js.configs.recommended],
@@ -77,7 +77,9 @@ export default defineConfig(
     },
   },
   {
-    files: ['vite.config.ts', 'vitest.config.ts'],
+    // Build configuration, not app code: may import tooling (e.g. @capacitor/cli types).
+    files: ['vite.config.ts', 'vitest.config.ts', 'capacitor.config.ts'],
     languageOptions: { globals: globals.node },
+    rules: { 'no-restricted-imports': 'off' },
   },
 );

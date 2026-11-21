@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptive / themed launcher icon foreground: the Anchor mark (half-filled circle).
+     108dp canvas; the mark (60dp across) sits inside the 66dp safe zone so every launcher mask keeps it whole.
+     Geometry = the 512-unit SVG mark scaled by 0.1875 around the centre. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#5EEAD4"
+        android:strokeWidth="4.5"
+        android:pathData="M54,26.25 A27.75,27.75 0 1,1 54,81.75 A27.75,27.75 0 1,1 54,26.25 Z" />
+    <path
+        android:fillColor="#5EEAD4"
+        android:pathData="M54,26.25 A27.75,27.75 0 0,1 54,81.75 Z" />
+</vector>

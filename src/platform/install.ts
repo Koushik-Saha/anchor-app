@@ -1,3 +1,5 @@
+import { isNative } from './runtime';
+
 /**
  * Install ("Add to Home Screen") adapter. Use as a namespace:
  *   import * as install from '../platform/install';
@@ -52,6 +54,7 @@ let snapshot: InstallState = computeState();
 const listeners = new Set<() => void>();
 
 function isStandalone(): boolean {
+  if (isNative()) return true; // the iOS / Android app is, by definition, installed
   if (typeof window === 'undefined') return false;
   const iosStandalone = 'standalone' in navigator && (navigator as { standalone?: boolean }).standalone === true;
   return iosStandalone || (typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches);
