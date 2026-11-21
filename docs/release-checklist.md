@@ -126,4 +126,4 @@ Other review risks:
 - **Apple 5.1.1 / Play User Data:** no data collected, a privacy policy URL is set, and the privacy manifest declares nothing collected. ✅
 - **Permissions:**
   - iOS requests none.
-  - Android declares only install-time VIBRATE and BILLING; INTERNET is removed. Check the *Merged Manifest* in Android Studio. ✅
+  - Android: the merged manifest (verified by a test build) holds only install-time VIBRATE and BILLING, plus AndroidX's app-private `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` (signature-level, invisible to users). INTERNET is removed. ✅

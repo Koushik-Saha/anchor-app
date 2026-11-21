@@ -53,7 +53,9 @@
          Billing talks to the Play Store app, not the network, from our process).
          Merged in by libraries — install-time "normal" permissions, auto-granted, never prompted:
            VIBRATE                     (@capacitor/haptics)
-           com.android.vending.BILLING (Google Play Billing, via @capgo/native-purchases) -->
+           com.android.vending.BILLING (Google Play Billing, via @capgo/native-purchases)
+         Plus app.anchor.reset.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION (AndroidX Core): app-private,
+         signature-level, used only between the app's own components — never shown to users. -->
     <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove" />
 </manifest>

@@ -73,7 +73,7 @@ Product `full_unlock`, **non-consumable**, $6.99 — bought directly through Sto
 - [ ] **Restore on a fresh install:** buy → delete the app → reinstall → open Library. Expected: already unlocked (silent entitlement check). If not, *Settings → Restore purchases* → "One-time unlock · Active".
 - [ ] Restore with a different store account that never bought → "No earlier purchase found for this account."
 - [ ] Airplane mode after unlocking → everything still unlocked (the flag is stored on the device).
-- [ ] Android: *Merged Manifest* tab in Android Studio shows only VIBRATE and com.android.vending.BILLING — no INTERNET.
+- [ ] Android: *Merged Manifest* tab in Android Studio shows only VIBRATE, com.android.vending.BILLING and the app-private `app.anchor.reset.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` (added by AndroidX Core, signature-level, never shown to users) — no INTERNET.
 
 ## What's configured where
 
