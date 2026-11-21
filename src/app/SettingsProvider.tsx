@@ -18,6 +18,11 @@ export function SettingsProvider({ initial, children }: SettingsProviderProps) {
     document.documentElement.toggleAttribute('data-large-text', settings.largeText);
   }, [settings.largeText]);
 
+  // App-level reduce motion: index.css applies the same rules as the OS media query.
+  useLayoutEffect(() => {
+    document.documentElement.toggleAttribute('data-reduced-motion', settings.reducedMotion);
+  }, [settings.reducedMotion]);
+
   // Adapters gate themselves, so call sites can just call pulse()/toneOnPhaseChange().
   useEffect(() => haptics.setEnabled(settings.haptics), [settings.haptics]);
   useEffect(() => audio.setEnabled(settings.sound), [settings.sound]);

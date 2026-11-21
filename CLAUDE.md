@@ -63,7 +63,8 @@ CI (`.github/workflows/ci.yml`) runs typecheck → lint → test → build → s
   - `Screen` — page layout (480px column, safe areas); `bottom` prop for a `BottomBar`.
   - `BigButton` — primary action, accent, min 96px. One per screen at most.
   - `CalmButton` — secondary; `variant="surface"` (64px, OK in reset flow) or `"quiet"` (48px text link, outside reset flow only).
-  - `ScreenTitle`, `BottomBar`, `Toggle` (settings switch), `CrisisLine` (988 line), `BreathMark` (logo), `StubScreen` (temporary), `DeviceCheck` (adapter test panel on Settings).
+  - `ScreenTitle`, `BottomBar`, `Toggle` (settings switch, optional description/disabled), `Sheet` (native-<dialog> bottom panel — never in the reset flow), `ProgressDots`, `CrisisLine` (988 line), `BreathMark` (logo), `StubScreen` (temporary), `DeviceCheck` (adapter test panel, dev builds only).
+  - Reduced motion = OS setting OR `settings.reducedMotion`: use `useReducedMotion()`, never the media query alone.
   - `cx()` + `focusRing` in `cx.ts`.
 
 ## Conventions

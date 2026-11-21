@@ -179,6 +179,15 @@ describe('normalizeSettings', () => {
     }
   });
 
+  it('keeps a full valid settings object as-is', () => {
+    const stored = { haptics: false, sound: true, largeText: true, reducedMotion: true, tonePitch: 'mid' };
+    expect(normalizeSettings(stored)).toEqual(stored);
+  });
+
+  it('settings saved before reducedMotion existed get it defaulted to false', () => {
+    expect(normalizeSettings({ haptics: false, sound: true, largeText: true, tonePitch: 'mid' }).reducedMotion).toBe(false);
+  });
+
   it('fills missing fields from defaults and replaces wrongly-typed ones', () => {
     expect(normalizeSettings({ largeText: true })).toEqual({ ...DEFAULT_SETTINGS, largeText: true });
     expect(normalizeSettings({ largeText: 'yes', tonePitch: 'high', extra: 1 })).toEqual(DEFAULT_SETTINGS);

@@ -19,6 +19,8 @@ export interface Settings {
   haptics: boolean;
   sound: boolean;
   largeText: boolean;
+  /** App-level reduce motion. The OS setting is honoured too, independently. */
+  reducedMotion: boolean;
   tonePitch: TonePitch;
 }
 
@@ -58,6 +60,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = {
   haptics: true,
   sound: false,
   largeText: false,
+  reducedMotion: false,
   tonePitch: 'low',
 };
 
@@ -76,6 +79,7 @@ export function normalizeSettings(raw: unknown): Settings {
     haptics: bool(r.haptics, DEFAULT_SETTINGS.haptics),
     sound: bool(r.sound, DEFAULT_SETTINGS.sound),
     largeText: bool(r.largeText, DEFAULT_SETTINGS.largeText),
+    reducedMotion: bool(r.reducedMotion, DEFAULT_SETTINGS.reducedMotion),
     tonePitch: r.tonePitch === 'low' || r.tonePitch === 'mid' ? r.tonePitch : DEFAULT_SETTINGS.tonePitch,
   };
 }

@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigation } from '../app/navigation';
 import { useSettings } from '../app/settings';
-import { usePrefersReducedMotion } from '../app/useReducedMotion';
+import { useReducedMotion } from '../app/useReducedMotion';
 import { BigButton } from '../components/BigButton';
 import { createCircleAnimator } from '../components/breathCircle';
 import { CalmButton } from '../components/CalmButton';
@@ -20,7 +20,7 @@ import * as wakeLock from '../platform/wakeLock';
 export function Reset({ protocolId }: { protocolId: ProtocolId }) {
   const { navigate } = useNavigation();
   const { settings } = useSettings();
-  const reducedMotion = usePrefersReducedMotion();
+  const reducedMotion = useReducedMotion();
   const protocol = getProtocol(protocolId) ?? defaultProtocol;
 
   const circleRef = useRef<HTMLDivElement>(null);

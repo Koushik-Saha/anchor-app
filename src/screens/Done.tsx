@@ -5,16 +5,10 @@ import { CalmButton } from '../components/CalmButton';
 import { CrisisLine } from '../components/CrisisLine';
 import { cx } from '../components/cx';
 import { Screen } from '../components/Screen';
+import { HELPED_OPTIONS } from '../content/format';
 import type { ProtocolId } from '../content/protocols';
 import * as haptics from '../platform/haptics';
 import { storage, type Helped } from '../platform/storage';
-
-const OPTIONS: readonly { value: Helped; label: string }[] = [
-  { value: 'breathing', label: 'Breathing' },
-  { value: 'grounding', label: 'Grounding' },
-  { value: 'both', label: 'Both' },
-  { value: 'not-sure', label: 'Not sure' },
-];
 
 interface DoneProps {
   protocolId: ProtocolId;
@@ -54,7 +48,7 @@ export function Done({ protocolId, completedAt }: DoneProps) {
             What helped?
           </h2>
           <div className="grid grid-cols-2 gap-3">
-            {OPTIONS.map(({ value, label }) => (
+            {HELPED_OPTIONS.map(({ value, label }) => (
               <CalmButton
                 key={value}
                 aria-pressed={helped === value}

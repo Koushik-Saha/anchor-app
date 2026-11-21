@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { useSettings } from './settings';
 
 const QUERY = '(prefers-reduced-motion: reduce)';
 
@@ -11,7 +12,14 @@ const subscribe = (onChange: () => void): (() => void) => {
 
 const getSnapshot = (): boolean => typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia(QUERY).matches;
 
-/** Live system "reduce motion" preference. */
+/** Live OS "reduce motion" preference. */
 export function usePrefersReducedMotion(): boolean {
   return useSyncExternalStore(subscribe, getSnapshot, () => false);
+}
+
+/** Reduce motion if the OS asks for it OR the in-app setting is on. */
+export function useReducedMotion(): boolean {
+  const osPrefers = usePrefersReducedMotion();
+  const { settings } = useSettings();
+  return osPrefers || settings.reducedMotion;
 }
