@@ -1,0 +1,61 @@
+@import 'tailwindcss';
+
+/* Design tokens — CLAUDE.md rule 7. Dark theme only. */
+@theme {
+  --color-canvas: #0f172a; /* background */
+  --color-surface: #1e293b;
+  --color-accent: #5eead4;
+  --color-ink: #e2e8f0; /* text */
+  --color-muted: #94a3b8;
+
+  /* Minimum tap target inside the reset flow: min-h-tap / min-w-tap / size-tap */
+  --spacing-tap: 4rem;
+
+  /* System fonts only: zero downloads, works offline. */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Safe-area padding for notched phones / installed PWA. */
+@utility pt-safe {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+@utility pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background-color: var(--color-canvas);
+    /* Percentage (not px) so the user's system font size is respected. */
+    font-size: 100%;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* largeText setting: every rem-based size (text, spacing, tap targets) scales up. */
+  html[data-large-text] {
+    font-size: 125%;
+  }
+
+  body {
+    @apply min-h-dvh bg-canvas font-sans text-ink antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button {
+    cursor: pointer;
+  }
+}
+
+/* Respect prefers-reduced-motion everywhere. Components can also use motion-safe: variants. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
