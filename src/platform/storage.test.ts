@@ -180,7 +180,7 @@ describe('normalizeSettings', () => {
   });
 
   it('keeps a full valid settings object as-is', () => {
-    const stored = { haptics: false, sound: true, largeText: true, reducedMotion: true, tonePitch: 'mid' };
+    const stored = { haptics: false, sound: true, largeText: true, reducedMotion: true, tonePitch: 'mid', installHintDismissed: true };
     expect(normalizeSettings(stored)).toEqual(stored);
   });
 

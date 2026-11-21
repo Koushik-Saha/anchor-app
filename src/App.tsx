@@ -27,8 +27,8 @@ function renderRoute(route: Route): ReactElement {
   }
 }
 
-export function App() {
-  const [route, setRoute] = useState<Route>({ view: 'home' });
+export function App({ initialRoute = { view: 'home' } }: { initialRoute?: Route }) {
+  const [route, setRoute] = useState<Route>(initialRoute);
 
   const navigate = useCallback<Navigation['navigate']>((to) => {
     setRoute(typeof to === 'string' ? { view: to } : to);

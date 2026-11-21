@@ -22,6 +22,8 @@ export interface Settings {
   /** App-level reduce motion. The OS setting is honoured too, independently. */
   reducedMotion: boolean;
   tonePitch: TonePitch;
+  /** "Add to Home Screen" hint dismissed with "Not now". */
+  installHintDismissed: boolean;
 }
 
 export type Helped = 'breathing' | 'grounding' | 'both' | 'not-sure';
@@ -62,6 +64,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = {
   largeText: false,
   reducedMotion: false,
   tonePitch: 'low',
+  installHintDismissed: false,
 };
 
 // ─── Validation: stored data may be old, partial or corrupt ──────────────────
@@ -81,6 +84,7 @@ export function normalizeSettings(raw: unknown): Settings {
     largeText: bool(r.largeText, DEFAULT_SETTINGS.largeText),
     reducedMotion: bool(r.reducedMotion, DEFAULT_SETTINGS.reducedMotion),
     tonePitch: r.tonePitch === 'low' || r.tonePitch === 'mid' ? r.tonePitch : DEFAULT_SETTINGS.tonePitch,
+    installHintDismissed: bool(r.installHintDismissed, DEFAULT_SETTINGS.installHintDismissed),
   };
 }
 

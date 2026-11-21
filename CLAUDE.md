@@ -67,6 +67,14 @@ CI (`.github/workflows/ci.yml`) runs typecheck → lint → test → build → s
   - Reduced motion = OS setting OR `settings.reducedMotion`: use `useReducedMotion()`, never the media query alone.
   - `cx()` + `focusRing` in `cx.ts`.
 
+## PWA
+
+- Manifest + service worker are configured in `vite.config.ts` (vite-plugin-pwa, generateSW). Every built file is precached; there is no runtime caching because the app makes no requests.
+- Icons: edit `public/icon.svg` / `public/icon-maskable.svg`, then run `scripts/generate-icons.sh` and commit the PNGs.
+- Launch URL `/?action=start` (manifest shortcut, later `anchor://start`) opens classic-90; handled once in `main.tsx` via `src/app/launch.ts`.
+- Install hint (`InstallHint`, `src/platform/install.ts`): mobile browsers only, Done screen only, never in the reset flow. The browser's own install banner is suppressed so it can't pop up mid-reset.
+- Release check: `docs/pwa-checklist.md` (Lighthouse **11** — v12+ has no PWA category).
+
 ## Conventions
 
 - Mobile-first single column; centred at max ~480px on wider screens.

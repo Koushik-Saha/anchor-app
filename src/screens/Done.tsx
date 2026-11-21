@@ -3,6 +3,7 @@ import { useNavigation } from '../app/navigation';
 import { BottomBar } from '../components/BottomBar';
 import { CalmButton } from '../components/CalmButton';
 import { CrisisLine } from '../components/CrisisLine';
+import { InstallHint } from '../components/InstallHint';
 import { cx } from '../components/cx';
 import { Screen } from '../components/Screen';
 import { HELPED_OPTIONS } from '../content/format';
@@ -64,6 +65,9 @@ export function Done({ protocolId, completedAt }: DoneProps) {
             {saveState === 'failed' && 'Couldn’t save on this device.'}
           </p>
         </section>
+
+        {/* A calm moment after a reset — the best time to suggest it, never during one. */}
+        <InstallHint />
       </div>
 
       <CrisisLine />
