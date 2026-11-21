@@ -28,9 +28,33 @@ export function Reset({ protocolId }: { protocolId: ProtocolId }) {
   const [phaseIndex, setPhaseIndex] = useState(0);
   const [text, setText] = useState('');
   const [interrupted, setInterrupted] = useState(false);
+  const resumeRef = useRef<HTMLButtonElement>(null);
+
+  // At very large text the middle can overflow and scroll; only then is it a keyboard stop.
+  const mainRef = useRef<HTMLElement>(null);
+  const [scrollable, setScrollable] = useState(false);
+  useLayoutEffect(() => {
+    const main = mainRef.current;
+    if (!main) return;
+    const check = () => setScrollable(main.scrollHeight > main.clientHeight + 1);
+    const observer = new ResizeObserver(check);
+    observer.observe(main);
+    if (main.firstElementChild) observer.observe(main.firstElementChild);
+    check();
+    return () => observer.disconnect();
+  }, []);
+
+  // Coming back to "Welcome back.": put keyboard / screen-reader focus on the choice.
+  useEffect(() => {
+    if (interrupted) resumeRef.current?.focus();
+  }, [interrupted]);
 
   // Latest values for engine callbacks, without restarting the engine when they change.
-  const live = useRef({ navigate, reducedMotion, tonePitch: settings.tonePitch });
+  const live = useRef({
+    navigate,
+    reducedMotion,
+    tonePitch: settings.tonePitch,
+  });
   useEffect(() => {
     live.current = { navigate, reducedMotion, tonePitch: settings.tonePitch };
   });
@@ -83,7 +107,11 @@ export function Reset({ protocolId }: { protocolId: ProtocolId }) {
         haptics.pulse('done');
         // Saved now, so the run is in history even if "What helped?" is never answered.
         const completedAt = new Date().toISOString();
-        void storage.addHistoryEntry({ at: completedAt, protocolId, completed: true });
+        void storage.addHistoryEntry({
+          at: completedAt,
+          protocolId,
+          completed: true,
+        });
         live.current.navigate({ view: 'done', protocolId, completedAt });
       },
     });
@@ -113,7 +141,11 @@ export function Reset({ protocolId }: { protocolId: ProtocolId }) {
     const status = engine?.getState().status;
     if (engine && (status === 'running' || status === 'paused')) {
       engine.abort();
-      void storage.addHistoryEntry({ at: new Date().toISOString(), protocolId, completed: false });
+      void storage.addHistoryEntry({
+        at: new Date().toISOString(),
+        protocolId,
+        completed: false,
+      });
     }
     navigate('home');
   };
@@ -125,13 +157,14 @@ export function Reset({ protocolId }: { protocolId: ProtocolId }) {
   });
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLElement && e.target.closest('button, a, input')) return;
-      if (e.key === ' ') {
-        e.preventDefault();
-        keys.current.skip();
-      } else if (e.key === 'Escape') {
+      if (e.key === 'Escape') {
         keys.current.close();
+        return;
       }
+      if (e.key !== ' ' || e.repeat) return;
+      if (e.target instanceof HTMLElement && e.target.closest('button, a, input')) return; // let buttons handle Space
+      e.preventDefault();
+      keys.current.skip();
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
@@ -140,52 +173,81 @@ export function Reset({ protocolId }: { protocolId: ProtocolId }) {
   return (
     <div
       className={cx(
-        'mx-auto flex h-dvh w-full max-w-[480px] flex-col overflow-hidden px-4 pt-safe pb-safe sm:px-6',
+        // Full-height column: ✕ (top) and Skip (bottom) are always on screen; the circle
+        // takes whatever space is left, so the words stay visible even at 200% text.
+        'mx-auto flex h-dvh w-full max-w-[480px] flex-col px-4 sm:px-6',
         protocol.extraDim && 'opacity-60',
       )}
     >
-      <header className="flex justify-end">
+      <header className="flex shrink-0 justify-end pt-safe">
+        {/* Not visible (≤ 8 words on screen), but names the screen for assistive tech; focused on arrival. */}
+        <h1 tabIndex={-1} className="sr-only">
+          Reset
+        </h1>
         <button
           type="button"
           aria-label="Close"
           onClick={close}
           className={cx('grid size-tap place-items-center rounded-2xl text-muted active:text-ink', focusRing)}
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true" className="size-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            className="size-7"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          >
             <path d="M6 6l12 12M18 6L6 18" />
           </svg>
         </button>
       </header>
 
-      <main className="flex flex-1 flex-col items-center justify-center gap-10">
-        <div aria-hidden="true" className="relative size-[min(72vw,18rem)]">
-          <div className="absolute inset-0 rounded-full border border-accent/15" />
-          <div
-            ref={circleRef}
-            className="absolute inset-0 rounded-full bg-accent/25 shadow-[0_0_80px_rgb(94_234_212/0.25)] will-change-transform"
-            style={{ transform: 'scale(0.5)' }}
-          />
-        </div>
-
-        {interrupted ? (
-          <div className="flex w-full flex-col items-center gap-4">
-            <p className="text-[1.75rem] leading-tight font-medium text-ink">Welcome back.</p>
-            <BigButton onClick={() => engineRef.current?.resume()}>Resume</BigButton>
-            <CalmButton className="w-full" onClick={() => engineRef.current?.restart()}>
-              Start over
-            </CalmButton>
+      <main
+        ref={mainRef}
+        tabIndex={scrollable ? 0 : undefined}
+        className={cx('flex min-h-0 flex-1 flex-col overflow-y-auto py-2', focusRing)}
+      >
+        {/* my-auto centres when there is room and starts at the top when there is not — never unreachable. */}
+        <div className="my-auto flex max-h-full min-h-0 w-full flex-col items-center gap-6">
+          {/* Circle area: 18rem, shrinking when space is short (large text) so the words stay visible. */}
+          <div className="flex min-h-16 w-full flex-[0_1_18rem] items-center justify-center">
+            <div aria-hidden="true" className="relative aspect-square h-[min(100%,72vw,18rem)]">
+              <div className="absolute inset-0 rounded-full border border-accent/15" />
+              <div
+                ref={circleRef}
+                className="absolute inset-0 rounded-full bg-accent/25 shadow-[0_0_80px_rgb(94_234_212/0.25)] will-change-transform"
+                style={{ transform: 'scale(0.5)' }}
+              />
+            </div>
           </div>
-        ) : (
-          <>
-            <p aria-live="polite" className="flex min-h-[4.5rem] items-center text-center text-[1.75rem] leading-tight font-medium text-ink">
-              {text}
-            </p>
-            <ProgressDots count={protocol.phases.length} current={phaseIndex} />
-          </>
-        )}
+
+          {interrupted ? (
+            <div className="flex w-full flex-col items-center gap-4">
+              <p className="text-[1.75rem] leading-tight font-medium text-ink">Welcome back.</p>
+              <BigButton ref={resumeRef} onClick={() => engineRef.current?.resume()}>
+                Resume
+              </BigButton>
+              <CalmButton className="w-full" onClick={() => engineRef.current?.restart()}>
+                Start over
+              </CalmButton>
+            </div>
+          ) : (
+            <>
+              <p
+                aria-live="polite"
+                className="flex min-h-[4.5rem] items-center text-center text-[1.75rem] leading-tight font-medium text-ink"
+              >
+                {text}
+              </p>
+              <ProgressDots count={protocol.phases.length} current={phaseIndex} />
+            </>
+          )}
+        </div>
       </main>
 
-      <footer className="flex justify-end pt-4">
+      <footer className="flex shrink-0 justify-end pt-4 pb-safe">
         <CalmButton className="min-w-28" onClick={skip}>
           Skip
         </CalmButton>

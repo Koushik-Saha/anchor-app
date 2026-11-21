@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigation } from '../app/navigation';
 import { callLabel, telHref } from '../app/plan';
+import { getCachedPlan } from '../app/planStore';
 import { useUnlocked } from '../app/unlock';
 import { BottomBar } from '../components/BottomBar';
 import { CalmButton } from '../components/CalmButton';
@@ -24,12 +25,9 @@ export function Done({ protocolId, completedAt }: DoneProps) {
   const [helped, setHelped] = useState<Helped | null>(null);
   const [saveState, setSaveState] = useState<'idle' | 'saved' | 'failed'>('idle');
   const unlocked = useUnlocked();
-  const [plan, setPlan] = useState<PanicPlan | undefined>();
-
   // My plan (part of the unlock): their own note, and a one-tap call to their person.
-  useEffect(() => {
-    if (unlocked) void storage.getPanicPlan().then(setPlan);
-  }, [unlocked]);
+  // Read from the startup cache so it's there on the first frame (no layout shift).
+  const plan: PanicPlan | undefined = getCachedPlan();
   const note = unlocked ? plan?.note : undefined;
   const tel = unlocked ? telHref(plan?.contactPhone) : null;
 
@@ -50,19 +48,19 @@ export function Done({ protocolId, completedAt }: DoneProps) {
       }
     >
       <div className="flex flex-1 flex-col justify-center gap-10 py-6">
-        <h1 className="text-3xl leading-tight font-semibold tracking-tight text-ink">
+        <h1 tabIndex={-1} className="text-3xl leading-tight font-semibold tracking-tight text-ink outline-none">
           You did it.
           <span className="block text-muted">It always passes.</span>
         </h1>
 
         {(note || tel) && (
           <div className="flex flex-col gap-4">
-            {note && <p className="border-l-2 border-accent pl-4 text-xl leading-snug text-ink">{note}</p>}
+            {note && <p className="border-l-2 border-accent pl-4 text-xl leading-snug text-ink [overflow-wrap:anywhere]">{note}</p>}
             {tel && (
               <a
                 href={tel}
                 className={cx(
-                  'flex min-h-tap items-center justify-center gap-3 rounded-2xl bg-surface px-5 text-lg font-medium text-ink active:bg-surface/70',
+                  'flex min-h-tap items-center justify-center gap-3 rounded-2xl bg-surface px-5 py-3 text-center text-lg font-medium text-ink [overflow-wrap:anywhere] active:bg-surface/70',
                   focusRing,
                 )}
               >
@@ -79,7 +77,7 @@ export function Done({ protocolId, completedAt }: DoneProps) {
           <h2 id="what-helped" className="text-lg text-ink">
             What helped?
           </h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,9rem),1fr))] gap-3">
             {HELPED_OPTIONS.map(({ value, label }) => (
               <CalmButton
                 key={value}

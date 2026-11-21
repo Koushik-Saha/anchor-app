@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { routeFromUrl } from './app/launch';
 import { NavigationContext, type Navigation, type Route } from './app/navigation';
 import * as deepLinks from './platform/deepLinks';
@@ -49,9 +49,16 @@ export function App({ initialRoute = { view: 'home' } }: { initialRoute?: Route 
     [],
   );
 
-  // Each view starts at the top, like a fresh screen.
+  // Each view starts at the top, like a fresh screen — and keyboard / screen-reader focus
+  // moves to its heading, so the change is announced and Tab starts from the top.
+  const firstRender = useRef(true);
   useEffect(() => {
     window.scrollTo(0, 0);
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    document.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
   }, [route]);
 
   return <NavigationContext.Provider value={nav}>{renderRoute(route)}</NavigationContext.Provider>;

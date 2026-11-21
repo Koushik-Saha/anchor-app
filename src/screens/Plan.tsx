@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useNavigation } from '../app/navigation';
-import { PLAN_LIMITS, cleanPlan, isPlanEmpty } from '../app/plan';
+import { PLAN_LIMITS } from '../app/plan';
+import { getCachedPlan, savePlan } from '../app/planStore';
 import { syncUnlockWithStore, useUnlocked } from '../app/unlock';
 import { BottomBar } from '../components/BottomBar';
 import { CalmButton } from '../components/CalmButton';
@@ -8,18 +9,14 @@ import { cx, focusRing } from '../components/cx';
 import { Screen } from '../components/Screen';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { UnlockPanel } from '../components/UnlockPanel';
-import { storage, type PanicPlan } from '../platform/storage';
+import type { PanicPlan } from '../platform/storage';
 
 type Fields = Required<Record<keyof PanicPlan, string>>;
 const EMPTY: Fields = { note: '', contactName: '', contactPhone: '', medsNote: '' };
 const SAVE_DELAY_MS = 500;
 
 /** Saves the cleaned plan; an all-empty plan is removed rather than stored as blanks. */
-async function persist(values: Fields): Promise<void> {
-  const plan = cleanPlan(values);
-  if (isPlanEmpty(plan)) await storage.remove('panicPlan');
-  else await storage.savePanicPlan(plan);
-}
+const persist = (values: Fields): Promise<void> => savePlan(values);
 
 /**
  * "This never leaves your device" also means: no cloud spellcheck and no grammar
@@ -59,13 +56,10 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 }
 
 function PlanForm() {
-  const [fields, setFields] = useState<Fields | null>(null); // null until loaded: never overwrite with blanks
+  // Starts from the startup cache: the form is complete on its first frame.
+  const [fields, setFields] = useState<Fields>(() => ({ ...EMPTY, ...getCachedPlan() }));
   const [saved, setSaved] = useState(false);
   const pending = useRef<Fields | null>(null);
-
-  useEffect(() => {
-    void storage.getPanicPlan().then((plan) => setFields({ ...EMPTY, ...plan }));
-  }, []);
 
   // Autosave shortly after typing stops, and flush on leaving the screen.
   useEffect(() => {
@@ -85,8 +79,6 @@ function PlanForm() {
     [],
   );
 
-  if (!fields) return null;
-
   const update = (key: keyof Fields, value: string) => {
     const next = { ...fields, [key]: value };
     pending.current = next;
@@ -96,7 +88,7 @@ function PlanForm() {
 
   const deletePlan = async () => {
     pending.current = null;
-    await storage.remove('panicPlan');
+    await savePlan(EMPTY);
     setFields(EMPTY);
     setSaved(true);
   };

@@ -23,12 +23,13 @@ export function Toggle({ label, checked, onChange, description, disabled = false
       disabled={disabled}
       onClick={() => onChange(!checked)}
       className={cx(
-        'flex min-h-tap w-full items-center justify-between gap-4 rounded-2xl bg-surface px-5 py-3 text-left',
+        // Wraps: at very large text on narrow screens the switch drops under its label instead of overflowing.
+        'flex min-h-tap w-full flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-2xl bg-surface px-5 py-3 text-left',
         'disabled:cursor-default',
         focusRing,
       )}
     >
-      <span className="flex flex-col">
+      <span className="flex min-w-0 grow basis-[9rem] flex-col">
         <span id={`${id}-label`} className="text-lg text-ink">
           {label}
         </span>
@@ -41,7 +42,7 @@ export function Toggle({ label, checked, onChange, description, disabled = false
       <span
         aria-hidden="true"
         className={cx(
-          'relative h-8 w-14 shrink-0 rounded-full motion-safe:transition-colors',
+          'relative ml-auto h-8 w-14 shrink-0 rounded-full motion-safe:transition-colors',
           checked ? 'bg-accent' : 'bg-canvas',
           disabled && 'opacity-60',
         )}

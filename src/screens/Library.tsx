@@ -32,13 +32,12 @@ function ProtocolCard({ protocol, locked, onSelect }: { protocol: Protocol; lock
     <button
       type="button"
       onClick={onSelect}
-      aria-label={`${protocol.name}, ${formatDuration(protocol.approxSeconds)}${locked ? ', part of the unlock' : ''}`}
       className={cx(
         'flex min-h-tap w-full flex-col gap-1 rounded-2xl bg-surface px-5 py-4 text-left active:bg-surface/70',
         focusRing,
       )}
     >
-      <span className="flex w-full items-baseline justify-between gap-3">
+      <span className="flex w-full flex-wrap items-baseline justify-between gap-x-3">
         <span className={cx('text-lg font-medium', locked ? 'text-ink/80' : 'text-ink')}>{protocol.name}</span>
         <span className="shrink-0 text-sm text-muted">{formatDuration(protocol.approxSeconds)}</span>
       </span>

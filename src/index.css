@@ -40,6 +40,7 @@
 
   body {
     @apply min-h-dvh bg-canvas font-sans text-ink antialiased;
+    overflow-wrap: break-word; /* long words wrap instead of pushing the page sideways */
     -webkit-tap-highlight-color: transparent;
   }
 

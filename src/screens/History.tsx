@@ -12,7 +12,7 @@ function HistoryRow({ entry }: { entry: HistoryEntry }) {
   const name = getProtocol(entry.protocolId)?.name ?? 'Reset';
   return (
     <li className="flex flex-col gap-1 rounded-2xl bg-surface px-5 py-4">
-      <span className="flex items-baseline justify-between gap-3">
+      <span className="flex flex-wrap items-baseline justify-between gap-x-3">
         <span className="font-medium text-ink">{name}</span>
         <span className={entry.completed ? 'text-sm text-accent' : 'text-sm text-muted'}>
           {entry.completed ? 'Completed' : 'Stopped'}

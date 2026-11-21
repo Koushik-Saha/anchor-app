@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useNavigation } from '../app/navigation';
 import { BigButton } from '../components/BigButton';
 import { BreathMark } from '../components/BreathMark';
@@ -10,19 +11,35 @@ import * as audio from '../platform/audio';
 export function Home() {
   const { navigate } = useNavigation();
 
+  // One tap — or one key — from app open to a running reset.
+  const start = () => {
+    audio.prime(); // this gesture unlocks sound for the reset's timed tones (iOS)
+    navigate({ view: 'reset', protocolId: DEFAULT_PROTOCOL_ID });
+  };
+  const startRef = useRef(start);
+  useEffect(() => {
+    startRef.current = start;
+  });
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== ' ' || e.repeat) return;
+      if (e.target instanceof HTMLElement && e.target.closest('button, a, input, textarea')) return;
+      e.preventDefault();
+      startRef.current();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
   return (
     <Screen className="justify-between gap-6">
-      <h1 className="flex items-center justify-center gap-2 pt-2 text-lg font-medium text-muted">
+      <h1 tabIndex={-1} className="flex items-center justify-center gap-2 pt-2 text-lg font-medium text-muted outline-none">
         <BreathMark className="size-5 text-accent" />
         Anchor
       </h1>
 
       <BigButton
-        onClick={() => {
-          // One tap from app open to a running reset.
-          audio.prime(); // this tap unlocks sound for the reset's timed tones (iOS)
-          navigate({ view: 'reset', protocolId: DEFAULT_PROTOCOL_ID });
-        }}
+        onClick={start}
         className="h-[40dvh] flex-col rounded-[2.5rem] text-3xl"
       >
         <BreathMark className="size-16" />

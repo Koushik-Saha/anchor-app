@@ -1,12 +1,16 @@
-import type { ButtonHTMLAttributes } from 'react';
+import { forwardRef, type ButtonHTMLAttributes } from 'react';
 import { cx, focusRing } from './cx';
 
 type BigButtonProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
 /** Primary action. Min height 96px (6rem, scales with large text), accent fill. */
-export function BigButton({ className, type = 'button', ...props }: BigButtonProps) {
+export const BigButton = forwardRef<HTMLButtonElement, BigButtonProps>(function BigButton(
+  { className, type = 'button', ...props },
+  ref,
+) {
   return (
     <button
+      ref={ref}
       type={type}
       className={cx(
         'flex min-h-24 w-full select-none items-center justify-center gap-4 rounded-3xl bg-accent px-6',
@@ -19,4 +23,4 @@ export function BigButton({ className, type = 'button', ...props }: BigButtonPro
       {...props}
     />
   );
-}
+});

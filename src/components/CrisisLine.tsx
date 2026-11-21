@@ -10,11 +10,11 @@ export function CrisisLine() {
   return (
     <p className="text-center text-sm text-muted">
       In crisis?{' '}
-      <a href="tel:988" className={link}>
+      <a href="tel:988" aria-label="Call 988" className={link}>
         Call
       </a>{' '}
       or{' '}
-      <a href="sms:988" className={link}>
+      <a href="sms:988" aria-label="Text 988" className={link}>
         text
       </a>{' '}
       988 (US)

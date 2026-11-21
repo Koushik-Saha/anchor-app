@@ -100,14 +100,15 @@ export function Settings() {
               if (on) audio.prime(); // this tap unlocks audio output (required on iOS)
             }}
           />
-          <div role="group" aria-label="Tone pitch" className="flex items-center gap-2 rounded-2xl bg-surface p-2 pl-5">
-            <span className="flex-1 text-lg text-ink">Tone pitch</span>
+          <div role="group" aria-label="Tone pitch" className="flex flex-wrap items-center gap-2 rounded-2xl bg-surface p-2 pl-5">
+            <span className="grow py-2 text-lg text-ink">Tone pitch</span>
+            <div className="flex grow basis-[min(100%,9rem)] flex-wrap gap-2">
             {PITCHES.map(({ value, label }) => (
               <CalmButton
                 key={value}
                 variant="quiet"
                 aria-pressed={settings.tonePitch === value}
-                className={cx('min-w-20', settings.tonePitch === value && 'bg-canvas text-ink')}
+                className={cx('grow basis-[4.5rem]', settings.tonePitch === value && 'bg-canvas text-ink')}
                 onClick={() => {
                   updateSettings({ tonePitch: value });
                   audio.prime();
@@ -117,6 +118,7 @@ export function Settings() {
                 {label}
               </CalmButton>
             ))}
+            </div>
           </div>
         </Group>
 
