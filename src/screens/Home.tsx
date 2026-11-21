@@ -4,6 +4,7 @@ import { BreathMark } from '../components/BreathMark';
 import { CalmButton } from '../components/CalmButton';
 import { CrisisLine } from '../components/CrisisLine';
 import { Screen } from '../components/Screen';
+import * as audio from '../platform/audio';
 
 export function Home() {
   const { navigate } = useNavigation();
@@ -16,7 +17,10 @@ export function Home() {
       </h1>
 
       <BigButton
-        onClick={() => navigate('reset')}
+        onClick={() => {
+          audio.prime(); // this tap unlocks sound for the reset's timed tones (iOS)
+          navigate('reset');
+        }}
         className="h-[40dvh] flex-col rounded-[2.5rem] text-3xl"
       >
         <BreathMark className="size-16" />

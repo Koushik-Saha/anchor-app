@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { protocolDurationSec, validateProtocol, type Protocol } from '../engine';
-import { DEFAULT_PROTOCOL_ID, getProtocol, isProtocolId, protocols } from './protocols';
+import { BREATH_LABELS } from './cueText';
+import { DEFAULT_PROTOCOL_ID, defaultProtocol, getProtocol, isProtocolId, protocols } from './protocols';
 
 // Guards every protocol shipped in the bundle, so bad content fails CI, not a user mid-panic.
 const all: readonly Protocol[] = protocols;
@@ -54,6 +55,11 @@ describe('bundled protocols', () => {
 
   it('the default protocol is free and exists', () => {
     expect(getProtocol(DEFAULT_PROTOCOL_ID)?.locked).toBe(false);
+    expect(defaultProtocol.id).toBe(DEFAULT_PROTOCOL_ID);
+  });
+
+  it('breath labels are short', () => {
+    for (const label of Object.values(BREATH_LABELS)) expect(wordCount(label)).toBeLessThanOrEqual(8);
   });
 
   it('getProtocol / isProtocolId look up by id', () => {

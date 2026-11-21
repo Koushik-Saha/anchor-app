@@ -135,3 +135,6 @@ export function getProtocol(id: string): Protocol | undefined {
 export function isProtocolId(id: string): id is ProtocolId {
   return byId.has(id);
 }
+
+/** The protocol "Start reset" on Home runs. */
+export const defaultProtocol: Protocol = classic90;
