@@ -1,0 +1,17 @@
+# Only what the web build needs goes into the build context.
+.git
+node_modules
+dist
+dev-dist
+coverage
+android
+ios
+docs
+resources
+*.md
+.env
+.env.*
+*.jks
+*.keystore
+keystore.properties
+.DS_Store

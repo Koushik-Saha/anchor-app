@@ -88,6 +88,12 @@ CI (`.github/workflows/ci.yml`) runs typecheck → lint → test → build → s
 - Install hint (`InstallHint`, `src/platform/install.ts`): mobile browsers only, Done screen only, never in the reset flow. The browser's own install banner is suppressed so it can't pop up mid-reset.
 - Release check: `docs/pwa-checklist.md` (Lighthouse **11** — v12+ has no PWA category).
 
+## Release & deploy
+
+- Web: `Dockerfile` (Node build → nginx) + `deploy/nginx.conf` / `deploy/security-headers.conf`. Hashed assets immutable; HTML, `sw.js`, manifest `no-cache`; strict CSP (`script-src 'self'`, `connect-src 'self'`) — never add inline scripts or third-party origins; no access logs. Verify with `scripts/smoke-web.sh <url>`. Coolify settings + device smoke test: `docs/deploy.md`.
+- Native signing: `docs/signing.md`. Android release signing reads `android/keystore.properties` (gitignored) or `ANCHOR_UPLOAD_*` env vars and refuses to build unsigned. Never commit keys, passwords, `.p8`/`.p12`/profiles (repo is public).
+- Web haptics/tones wait for the first user tap (`navigator.userActivation`) — launches via shortcut start silently rather than error.
+
 ## Conventions
 
 - Mobile-first single column; centred at max ~480px on wider screens.

@@ -47,9 +47,12 @@ function browserAudioContext(): AudioContextCtor | undefined {
 export function createWebAudio(Ctor: AudioContextCtor | undefined = browserAudioContext()): AudioAdapter {
   let ctx: AudioContext | null = null;
 
-  // Created lazily — creating it outside a gesture just yields a suspended context.
+  // Created lazily, and only after the person has tapped the page: before that, browsers
+  // refuse to start audio and log a warning (e.g. when launched straight into a reset).
   const getContext = (): AudioContext | null => {
     if (ctx || !Ctor) return ctx;
+    const activation = typeof navigator === 'undefined' ? undefined : navigator.userActivation;
+    if (activation && !activation.hasBeenActive) return null;
     try {
       ctx = new Ctor();
     } catch {

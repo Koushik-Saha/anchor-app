@@ -2,7 +2,7 @@
 
 Work through it top to bottom for every release. Nothing here submits anything on its own: the final *Submit for Review* / *Send for review* clicks are yours.
 
-Related: [store-listing.md](store-listing.md) (copy, privacy answers, screenshots) · [native.md](native.md) (device + purchase tests) · [pwa-checklist.md](pwa-checklist.md) (web).
+Related: [store-listing.md](store-listing.md) (copy, privacy answers, screenshots) · [signing.md](signing.md) (keys + signed builds) · [deploy.md](deploy.md) (Coolify + post-deploy smoke test) · [native.md](native.md) (device + purchase tests) · [pwa-checklist.md](pwa-checklist.md) (web).
 
 ---
 
@@ -61,17 +61,14 @@ Each release:
 
 One-time setup:
 - [ ] Google Play developer account ($25). Create the app (`app.anchor.reset`), free, with in-app products.
-- [ ] Create an **upload key**, keep it out of git (`*.jks` and `*.keystore` are gitignored; the repo is public), and back it up somewhere safe:
-  ```bash
-  keytool -genkeypair -v -keystore ~/anchor-upload.jks -alias anchor -keyalg RSA -keysize 2048 -validity 10000
-  ```
+- [ ] Create the **upload key** and `android/keystore.properties` exactly as in [signing.md](signing.md). Both stay outside git.
 - [ ] Enrol in **Play App Signing** when you first upload. Google holds the app signing key; you keep the upload key.
 - [ ] Fill in the *App content* forms using the exact answers in store-listing.md: privacy policy, ads (No), app access, content rating, target audience, **Data safety (No data collected)** and the **Health apps** declaration (wellness category).
 - [ ] **Backup decision:** `android:allowBackup="true"` today. See the note in store-listing.md; the privacy policy already covers the current setting.
 
 Each release:
 1. `npm run build && npx cap sync android && npx cap open android`
-2. **Build → Generate Signed App Bundle** → *Android App Bundle* → your upload key → **release**. The output is `android/app/release/app-release.aab`.
+2. `cd android && ./gradlew bundleRelease`, signed automatically from `keystore.properties`. Output: `android/app/build/outputs/bundle/release/app-release.aab`. Verify it with `jarsigner` (signing.md §4).
 3. Play Console → **Testing → Internal testing → Create release** → upload the `.aab` → add release notes → roll out to testers.
 4. Install from the internal testing link on a real phone and run the native.md checklist, including purchase with a license tester.
 5. Create the `full_unlock` product if this is the first release: *Monetize → In-app products*, USD 6.99, **Activate**.
@@ -84,7 +81,8 @@ Each release:
 
 ## 5. Web (PWA)
 
-- [ ] Deploy `dist/` to the static host over **HTTPS** (Coolify). Ideally enable HTTP/3, which saves one round trip on the first visit.
+- [ ] Deploy with the `Dockerfile` on Coolify using the exact settings in [deploy.md](deploy.md). Ideally enable HTTP/3 on the proxy, which saves one round trip on the first visit.
+- [ ] Run the post-deploy smoke test in deploy.md (A–F), starting with `scripts/smoke-web.sh https://YOUR-DOMAIN`.
 - [ ] `https://YOUR-DOMAIN/privacy.html` loads. This is the URL both stores link to.
 - [ ] Host access logs are off or kept short, matching what privacy.html says.
 - [ ] Run docs/pwa-checklist.md against the live URL.

@@ -27,9 +27,16 @@ export const WEB_PATTERNS: Readonly<Record<HapticPattern, number | readonly numb
 
 type Vibrate = (pattern: number | number[]) => boolean;
 
+/** Browsers block vibration (and log an error) until the person has tapped the page. */
+export function hasUserActivation(nav: { userActivation?: { hasBeenActive: boolean } } | undefined): boolean {
+  return !nav?.userActivation || nav.userActivation.hasBeenActive;
+}
+
 function browserVibrate(): Vibrate | undefined {
   if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') return undefined;
-  return (pattern) => navigator.vibrate(pattern);
+  // Launched straight into a reset (home-screen shortcut) there's been no tap yet:
+  // skip quietly until the first one rather than trigger the browser's intervention error.
+  return (pattern) => (hasUserActivation(navigator) ? navigator.vibrate(pattern) : false);
 }
 
 export function createWebHaptics(vibrate: Vibrate | undefined = browserVibrate()): HapticsAdapter {

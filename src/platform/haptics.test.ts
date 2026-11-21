@@ -1,6 +1,15 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as haptics from './haptics';
-import { createWebHaptics, type HapticsAdapter } from './haptics';
+import { createWebHaptics, hasUserActivation, type HapticsAdapter } from './haptics';
+
+describe('hasUserActivation', () => {
+  it('blocks only when the browser reports no interaction yet', () => {
+    expect(hasUserActivation({ userActivation: { hasBeenActive: false } })).toBe(false); // launched via shortcut
+    expect(hasUserActivation({ userActivation: { hasBeenActive: true } })).toBe(true);
+    expect(hasUserActivation({})).toBe(true); // browsers without the API: don't block
+    expect(hasUserActivation(undefined)).toBe(true);
+  });
+});
 
 describe('createWebHaptics', () => {
   it('maps each pattern to a vibration timing', async () => {
