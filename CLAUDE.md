@@ -26,6 +26,19 @@ One codebase → web (PWA) + Android + iOS (via Capacitor, not yet initialised).
 Rules 1, 3, 4 and the no-`any` part of 5 are enforced by ESLint (`eslint.config.js`); rule 6 by `npm run size` in CI.
 If a lint rule blocks you, route the call through `src/platform` — do not disable the rule.
 
+## Stack note: Preact behind React imports
+
+- Code is written against React APIs (`import { useState } from 'react'`, `@types/react` for types), but the app runs on **Preact** via `preact/compat` — aliased by `@preact/preset-vite` (build/dev) and in `vitest.config.ts` (tests). Chosen 2026-11-21 to cut JS from ~65 KB to ~29 KB gzip so Start is tappable < 1 s on a first visit over slow 4G.
+- Only use React APIs that `preact/compat` supports (hooks incl. `useSyncExternalStore`/`useId`, `forwardRef`, context, `createRoot`). Avoid React-only internals, Server Components and concurrent-only APIs (`useTransition`, `use`).
+- Keep the JS budget lean: check `npm run size` after adding UI.
+
+## Accessibility (verified each release)
+
+- Every screen has one `h1` (`tabIndex={-1}`); `App.tsx` moves focus to it on navigation. Reset's h1 is `sr-only`, inside the header landmark.
+- Keyboard: Space starts a reset on Home and skips a phase in the flow; Escape closes the flow. Focused buttons keep their own Space behaviour.
+- Layout must hold at 320 px and at 200 % text: let rows wrap (`flex-wrap`), never fixed heights with hidden overflow; user-entered text gets `[overflow-wrap:anywhere]`.
+- Contrast: every text token combination passes WCAG AA; don't add text colours with alpha below the current ones without re-checking.
+
 ## Commands
 
 Requires Node 22 (`nvm use` reads `.nvmrc`).

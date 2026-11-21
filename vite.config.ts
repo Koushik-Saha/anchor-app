@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import preact from '@preact/preset-vite';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
@@ -7,7 +7,9 @@ const BG = '#0F172A';
 
 export default defineConfig({
   plugins: [
-    react(),
+    // Preact runs the React code via preact/compat (aliases react, react-dom, jsx-runtime):
+    // ~4 KB instead of ~44 KB gzip, so Start is tappable sooner on a first visit.
+    preact(),
     tailwindcss(),
     VitePWA({
       // New versions install in the background and take over on the next launch.
