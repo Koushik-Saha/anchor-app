@@ -1,6 +1,7 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useNavigation } from '../app/navigation';
 import { useSettings } from '../app/settings';
+import { grantUnlock, useUnlocked } from '../app/unlock';
 import { usePrefersReducedMotion } from '../app/useReducedMotion';
 import { BottomBar } from '../components/BottomBar';
 import { CalmButton } from '../components/CalmButton';
@@ -11,6 +12,7 @@ import { ScreenTitle } from '../components/ScreenTitle';
 import { Toggle } from '../components/Toggle';
 import * as audio from '../platform/audio';
 import * as haptics from '../platform/haptics';
+import * as purchases from '../platform/purchases';
 
 const PITCHES = [
   { value: 'low', label: 'Low' },
@@ -26,6 +28,37 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
       </h2>
       {children}
     </section>
+  );
+}
+
+/** App Store / Play rules require a way to restore a purchase; native only (no web payments). */
+function PurchaseRow() {
+  const unlocked = useUnlocked();
+  const [status, setStatus] = useState<'idle' | 'checking' | 'not-found'>('idle');
+  if (!purchases.isAvailable()) return null;
+  if (unlocked) {
+    return (
+      <p className="flex min-h-tap items-center justify-between rounded-2xl bg-surface px-5 text-lg text-ink">
+        One-time unlock <span className="text-sm text-accent">Active</span>
+      </p>
+    );
+  }
+  const restore = async () => {
+    setStatus('checking');
+    if (await purchases.restore()) {
+      await grantUnlock();
+      setStatus('idle');
+    } else setStatus('not-found');
+  };
+  return (
+    <>
+      <CalmButton onClick={() => void restore()} disabled={status === 'checking'}>
+        {status === 'checking' ? 'Checking…' : 'Restore purchases'}
+      </CalmButton>
+      <p aria-live="polite" className="text-sm text-muted">
+        {status === 'not-found' && 'No earlier purchase found for this account.'}
+      </p>
+    </>
   );
 }
 
@@ -99,6 +132,12 @@ export function Settings() {
             onChange={(on) => updateSettings({ reducedMotion: on })}
           />
         </Group>
+
+        {purchases.isAvailable() && (
+          <Group title="Purchase">
+            <PurchaseRow />
+          </Group>
+        )}
 
         <Group title="Your data">
           <CalmButton className="justify-between" onClick={() => navigate('history')}>

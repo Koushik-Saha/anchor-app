@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigation } from '../app/navigation';
+import { callLabel, telHref } from '../app/plan';
+import { useUnlocked } from '../app/unlock';
 import { BottomBar } from '../components/BottomBar';
 import { CalmButton } from '../components/CalmButton';
 import { CrisisLine } from '../components/CrisisLine';
 import { InstallHint } from '../components/InstallHint';
-import { cx } from '../components/cx';
+import { cx, focusRing } from '../components/cx';
 import { Screen } from '../components/Screen';
 import { HELPED_OPTIONS } from '../content/format';
 import type { ProtocolId } from '../content/protocols';
 import * as haptics from '../platform/haptics';
-import { storage, type Helped } from '../platform/storage';
+import { storage, type Helped, type PanicPlan } from '../platform/storage';
 
 interface DoneProps {
   protocolId: ProtocolId;
@@ -21,6 +23,15 @@ export function Done({ protocolId, completedAt }: DoneProps) {
   const { navigate } = useNavigation();
   const [helped, setHelped] = useState<Helped | null>(null);
   const [saveState, setSaveState] = useState<'idle' | 'saved' | 'failed'>('idle');
+  const unlocked = useUnlocked();
+  const [plan, setPlan] = useState<PanicPlan | undefined>();
+
+  // My plan (part of the unlock): their own note, and a one-tap call to their person.
+  useEffect(() => {
+    if (unlocked) void storage.getPanicPlan().then(setPlan);
+  }, [unlocked]);
+  const note = unlocked ? plan?.note : undefined;
+  const tel = unlocked ? telHref(plan?.contactPhone) : null;
 
   // Optional, one tap. Tapping another option changes the answer.
   const answer = async (value: Helped) => {
@@ -43,6 +54,26 @@ export function Done({ protocolId, completedAt }: DoneProps) {
           You did it.
           <span className="block text-muted">It always passes.</span>
         </h1>
+
+        {(note || tel) && (
+          <div className="flex flex-col gap-4">
+            {note && <p className="border-l-2 border-accent pl-4 text-xl leading-snug text-ink">{note}</p>}
+            {tel && (
+              <a
+                href={tel}
+                className={cx(
+                  'flex min-h-tap items-center justify-center gap-3 rounded-2xl bg-surface px-5 text-lg font-medium text-ink active:bg-surface/70',
+                  focusRing,
+                )}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" className="size-5 text-accent" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" />
+                </svg>
+                {callLabel(plan)}
+              </a>
+            )}
+          </div>
+        )}
 
         <section aria-labelledby="what-helped" className="flex flex-col gap-3">
           <h2 id="what-helped" className="text-lg text-ink">

@@ -49,9 +49,11 @@
     </application>
 
     <!-- Permissions: Anchor requests none at runtime and needs no network.
-         INTERNET is removed (the web app is served from the APK, fully offline).
-         VIBRATE is merged in by @capacitor/haptics: an install-time "normal" permission
-         that is auto-granted and never shown as a prompt. -->
+         INTERNET is removed (the web app is served from the APK, fully offline; Google Play
+         Billing talks to the Play Store app, not the network, from our process).
+         Merged in by libraries — install-time "normal" permissions, auto-granted, never prompted:
+           VIBRATE                     (@capacitor/haptics)
+           com.android.vending.BILLING (Google Play Billing, via @capgo/native-purchases) -->
     <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove" />
 </manifest>

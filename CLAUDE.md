@@ -85,3 +85,10 @@ CI (`.github/workflows/ci.yml`) runs typecheck → lint → test → build → s
 - Native adapters (`src/platform/nativeAdapters.ts`: Preferences, Haptics, KeepAwake, App deep links) are loaded only via dynamic import when `isNative()` — never import Capacitor plugins anywhere else, so the web bundle stays plugin-free.
 - Permissions: none at runtime. Android: INTERNET removed in the manifest; only VIBRATE (from @capacitor/haptics). iOS: no `*UsageDescription` keys. Never add a plugin that needs more without asking.
 - The service worker is registered from `src/platform/serviceWorker.ts` on the web only, never inside the native apps.
+
+## One-time unlock (in-app purchase)
+
+- One non-consumable product, `full_unlock` ($6.99), bought through **StoreKit 2 / Google Play Billing directly** (`@capgo/native-purchases`, audited: no network/telemetry code). No RevenueCat or any purchase server, no API keys — the user chose this to keep rule 1.
+- `src/platform/purchases.ts` (adapter; web = unavailable, no web payments) → `src/app/unlock.ts` (`useUnlocked()`, `grantUnlock()`, silent `syncUnlockWithStore()`) → `UnlockPanel` (Library sheet, My plan). Restore purchases lives in the panel and in Settings (store rules require it).
+- The unlock is only ever granted, never auto-revoked: an offline/flaky store must not take features away mid-panic.
+- My plan fields are private: keep `PRIVATE_FIELD` (no spellcheck/grammar extensions) on every input that holds personal text.

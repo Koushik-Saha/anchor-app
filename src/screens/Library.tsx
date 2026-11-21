@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useNavigation } from '../app/navigation';
-import { BigButton } from '../components/BigButton';
+import { syncUnlockWithStore, useUnlocked } from '../app/unlock';
 import { BottomBar } from '../components/BottomBar';
 import { CalmButton } from '../components/CalmButton';
 import { cx, focusRing } from '../components/cx';
 import { Screen } from '../components/Screen';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { Sheet } from '../components/Sheet';
-import { UNLOCK_PRICE, formatDuration } from '../content/format';
+import { UnlockPanel } from '../components/UnlockPanel';
+import { formatDuration } from '../content/format';
 import { protocols } from '../content/protocols';
 import type { Protocol } from '../engine';
 import * as audio from '../platform/audio';
-import { storage } from '../platform/storage';
 
 type LibraryProtocol = (typeof protocols)[number];
 
@@ -54,20 +54,22 @@ function ProtocolCard({ protocol, locked, onSelect }: { protocol: Protocol; lock
 
 export function Library() {
   const { navigate } = useNavigation();
-  const [unlocked, setUnlocked] = useState(false);
+  const unlocked = useUnlocked();
   const [lockedChoice, setLockedChoice] = useState<LibraryProtocol | null>(null);
 
+  // Silent store check (no prompts): picks up a purchase from another install, e.g. after reinstalling.
   useEffect(() => {
-    void storage.isUnlocked().then(setUnlocked);
+    void syncUnlockWithStore();
   }, []);
 
-  const select = (protocol: LibraryProtocol) => {
-    if (protocol.locked && !unlocked) {
-      setLockedChoice(protocol);
-      return;
-    }
+  const start = (protocol: LibraryProtocol) => {
     audio.prime(); // this tap unlocks sound for the reset's timed tones (iOS)
     navigate({ view: 'reset', protocolId: protocol.id });
+  };
+
+  const select = (protocol: LibraryProtocol) => {
+    if (protocol.locked && !unlocked) setLockedChoice(protocol);
+    else start(protocol);
   };
 
   const free = protocols.filter((p) => !p.locked);
@@ -105,14 +107,9 @@ export function Library() {
         <h2 id="unlock-sheet-title" className="text-2xl font-semibold text-ink">
           {lockedChoice?.name}
         </h2>
-        <p className="text-lg text-ink">Part of the one-time unlock — {UNLOCK_PRICE}, no subscription.</p>
-        {/* Wired to in-app purchase in a later step. */}
-        <BigButton disabled aria-describedby="unlock-soon">
-          Unlock
-        </BigButton>
-        <p id="unlock-soon" className="-mt-2 text-center text-sm text-muted">
-          Coming soon.
-        </p>
+        {lockedChoice && (
+          <UnlockPanel doneLabel={`Start ${lockedChoice.name}`} onDone={() => start(lockedChoice)} />
+        )}
         <CalmButton variant="quiet" onClick={() => setLockedChoice(null)}>
           Not now
         </CalmButton>

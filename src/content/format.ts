@@ -18,9 +18,6 @@ export function helpedLabel(helped: Helped): string {
   return HELPED_OPTIONS.find((o) => o.value === helped)?.label ?? helped;
 }
 
-/** Price of the one-time unlock. Shown before purchase is wired up; the store price will replace it. */
-export const UNLOCK_PRICE = '$6.99';
-
 /** "Fri, Nov 20 · 5:37 PM" in the user's own locale. Returns '' for an unparseable date. */
 export function formatWhen(iso: string, locale?: string): string {
   const date = new Date(iso);
