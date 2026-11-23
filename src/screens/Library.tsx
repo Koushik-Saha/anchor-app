@@ -1,5 +1,6 @@
 import { getCachedCustomReset } from '../app/customResetStore';
 import { useNavigation } from '../app/navigation';
+import { useStrings } from '../app/settings';
 import { BottomBar } from '../components/BottomBar';
 import { CalmButton } from '../components/CalmButton';
 import { cx, focusRing } from '../components/cx';
@@ -7,6 +8,7 @@ import { Screen } from '../components/Screen';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { CUSTOM_RESET_ID, customProtocol } from '../content/customReset';
 import { formatDuration } from '../content/format';
+import { localizeProtocol } from '../content/localize';
 import { protocols } from '../content/protocols';
 import type { Protocol } from '../engine';
 import * as audio from '../platform/audio';
@@ -14,6 +16,7 @@ import * as audio from '../platform/audio';
 type LibraryProtocol = (typeof protocols)[number];
 
 function ProtocolCard({ protocol, onSelect }: { protocol: Protocol; onSelect: () => void }) {
+  const s = useStrings();
   return (
     <button
       type="button"
@@ -25,7 +28,7 @@ function ProtocolCard({ protocol, onSelect }: { protocol: Protocol; onSelect: ()
     >
       <span className="flex w-full flex-wrap items-baseline justify-between gap-x-3">
         <span className="text-lg font-medium text-ink [overflow-wrap:anywhere]">{protocol.name}</span>
-        <span className="shrink-0 text-sm text-muted">{formatDuration(protocol.approxSeconds)}</span>
+        <span className="shrink-0 text-sm text-muted">{formatDuration(protocol.approxSeconds, s.units)}</span>
       </span>
       <span className="text-sm text-muted">{protocol.description}</span>
     </button>
@@ -34,6 +37,7 @@ function ProtocolCard({ protocol, onSelect }: { protocol: Protocol; onSelect: ()
 
 export function Library() {
   const { navigate } = useNavigation();
+  const s = useStrings();
 
   // One tap, no gate: a protocol starts straight away, or (if it lets you choose
   // a breathing pattern) opens the pattern picker, where one more tap starts it.
@@ -56,27 +60,27 @@ export function Library() {
     <Screen
       bottom={
         <BottomBar>
-          <CalmButton onClick={() => navigate('home')}>Home</CalmButton>
+          <CalmButton onClick={() => navigate('home')}>{s.common.home}</CalmButton>
         </BottomBar>
       }
     >
-      <ScreenTitle>Library</ScreenTitle>
+      <ScreenTitle>{s.library.title}</ScreenTitle>
 
       <ul className="flex flex-col gap-3">
         {protocols.map((p) => (
           <li key={p.id}>
-            <ProtocolCard protocol={p} onSelect={() => start(p)} />
+            <ProtocolCard protocol={localizeProtocol(p, s)} onSelect={() => start(p)} />
           </li>
         ))}
         {custom && (
           <li>
-            <ProtocolCard protocol={customProtocol(custom)} onSelect={startCustom} />
+            <ProtocolCard protocol={customProtocol(custom, s)} onSelect={startCustom} />
           </li>
         )}
       </ul>
 
       <CalmButton variant="quiet" className="mt-4 self-center" onClick={() => navigate('builder')}>
-        {custom ? 'Change my reset' : 'Build my reset'}
+        {custom ? s.library.change : s.library.build}
       </CalmButton>
     </Screen>
   );

@@ -1,4 +1,5 @@
 import { getProtocol } from '../content/protocols';
+import { en, protocolText, type Strings } from '../content/strings';
 import type { HistoryEntry } from '../platform/storage';
 
 /**
@@ -71,26 +72,15 @@ export function whatHelpedStatements(history: readonly HistoryEntry[]): WhatHelp
   );
 }
 
-/** "11 pm", "12 am". */
-export function formatHour(hour: number): string {
-  return `${hour % 12 === 0 ? 12 : hour % 12} ${hour < 12 ? 'am' : 'pm'}`;
-}
+export const NO_PATTERNS_YET = en.whatHelped.none;
 
-const SUBJECT: Readonly<Record<HelpedSubject, string>> = {
-  breathing: 'Breathing',
-  grounding: 'Grounding',
-  both: 'Breathing and grounding',
-};
-
-export const NO_PATTERNS_YET = 'Finish a few resets and patterns will show up here.';
-
-export function statementText(statement: WhatHelpedStatement): string {
+export function statementText(statement: WhatHelpedStatement, s: Strings = en): string {
   switch (statement.kind) {
     case 'helped':
-      return `${SUBJECT[statement.subject]} helped ${statement.count} of your last ${statement.total} times.`;
+      return s.whatHelped.helped(statement.subject, statement.count, statement.total);
     case 'time':
-      return `You use Anchor most around ${formatHour(statement.hour)}.`;
+      return s.whatHelped.time(statement.hour);
     case 'most-used':
-      return `${statement.name} is your most-used reset.`;
+      return s.whatHelped.mostUsed(protocolText(s, statement.protocolId)?.name ?? statement.name);
   }
 }

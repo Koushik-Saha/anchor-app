@@ -1,4 +1,4 @@
-import { useSettings } from '../app/settings';
+import { useSettings, useStrings } from '../app/settings';
 import { resolveCrisisLine } from '../content/crisisLines';
 import { deviceLocales } from '../platform/locale';
 import { cx, focusRing } from './cx';
@@ -11,10 +11,11 @@ const link = cx(
 /** Discreet crisis line (Home + Done). Visible, never blocking. tel:/sms: open the phone's own apps. */
 export function CrisisLine() {
   const { settings } = useSettings();
-  const line = resolveCrisisLine(settings.crisisRegion, deviceLocales());
+  const s = useStrings();
+  const line = resolveCrisisLine(settings.crisisRegion, deviceLocales(), s);
   return (
     <p className="text-center text-sm text-muted">
-      In crisis?{' '}
+      {s.crisis.prefix}{' '}
       {line.segments.map((segment) =>
         segment.href ? (
           <a key={segment.href} href={segment.href} aria-label={segment.ariaLabel} className={link}>

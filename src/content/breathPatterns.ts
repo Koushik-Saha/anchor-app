@@ -1,4 +1,5 @@
 import { breathingCycleSec, phaseDurationSec, type BreathingPhase, type Protocol } from '../engine';
+import { en } from './strings';
 
 /**
  * Breathing patterns as data. Each one is just timing for a BreathingPhase, so the
@@ -22,26 +23,26 @@ export interface BreathPattern {
 export const BREATH_PATTERNS = [
   {
     id: '4-2-6',
-    name: 'Classic',
-    line: 'In 4, hold 2, out 6',
+    name: en.patterns['4-2-6'].name,
+    line: en.patterns['4-2-6'].line,
     timing: { inhaleSec: 4, holdSec: 2, exhaleSec: 6 }, // 12s
   },
   {
     id: 'box',
-    name: 'Box',
-    line: 'In, hold, out, hold: four each',
+    name: en.patterns['box'].name,
+    line: en.patterns['box'].line,
     timing: { inhaleSec: 4, holdSec: 4, exhaleSec: 4, holdOutSec: 4 }, // 16s
   },
   {
     id: '4-7-8',
-    name: '4-7-8',
-    line: 'In 4, hold 7, out 8',
+    name: en.patterns['4-7-8'].name,
+    line: en.patterns['4-7-8'].line,
     timing: { inhaleSec: 4, holdSec: 7, exhaleSec: 8 }, // 19s
   },
   {
     id: 'double-inhale',
-    name: 'Double inhale',
-    line: 'Two inhales, one long exhale',
+    name: en.patterns['double-inhale'].name,
+    line: en.patterns['double-inhale'].line,
     timing: { inhaleSec: 3, topUpSec: 1, holdSec: 0, exhaleSec: 6 }, // 10s
   },
 ] as const satisfies readonly BreathPattern[];

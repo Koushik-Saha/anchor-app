@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useNavigation } from '../app/navigation';
+import { useStrings } from '../app/settings';
 import { BigButton } from '../components/BigButton';
 import { BreathMark } from '../components/BreathMark';
 import { CalmButton } from '../components/CalmButton';
@@ -10,6 +11,7 @@ import * as audio from '../platform/audio';
 
 export function Home() {
   const { navigate } = useNavigation();
+  const s = useStrings();
 
   // One tap — or one key — from app open to a running reset.
   const start = () => {
@@ -43,21 +45,21 @@ export function Home() {
         className="h-[40dvh] flex-col rounded-[2.5rem] text-3xl"
       >
         <BreathMark className="size-16" />
-        Start reset
+        {s.home.start}
       </BigButton>
 
-      <nav aria-label="More" className="flex flex-wrap justify-center gap-1">
+      <nav aria-label={s.home.more} className="flex flex-wrap justify-center gap-1">
         <CalmButton variant="quiet" onClick={() => navigate('library')}>
-          Library
+          {s.home.library}
         </CalmButton>
         <CalmButton variant="quiet" onClick={() => navigate('plan')}>
-          My plan
+          {s.home.plan}
         </CalmButton>
         <CalmButton variant="quiet" onClick={() => navigate('what-helped')}>
-          What helped
+          {s.home.whatHelped}
         </CalmButton>
         <CalmButton variant="quiet" onClick={() => navigate('settings')}>
-          Settings
+          {s.home.settings}
         </CalmButton>
       </nav>
 

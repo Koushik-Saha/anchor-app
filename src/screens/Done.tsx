@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigation, type ResetId } from '../app/navigation';
+import { useStrings } from '../app/settings';
 import { callLabel, planOnDone } from '../app/plan';
 import { getCachedPlan } from '../app/planStore';
 import { BottomBar } from '../components/BottomBar';
@@ -8,7 +9,7 @@ import { CrisisLine } from '../components/CrisisLine';
 import { InstallHint } from '../components/InstallHint';
 import { cx, focusRing } from '../components/cx';
 import { Screen } from '../components/Screen';
-import { HELPED_OPTIONS } from '../content/format';
+import { HELPED_VALUES } from '../content/format';
 import * as haptics from '../platform/haptics';
 import { storage, type Helped, type PanicPlan } from '../platform/storage';
 
@@ -20,6 +21,7 @@ interface DoneProps {
 
 export function Done({ protocolId, completedAt }: DoneProps) {
   const { navigate } = useNavigation();
+  const s = useStrings();
   const [helped, setHelped] = useState<Helped | null>(null);
   const [saveState, setSaveState] = useState<'idle' | 'saved' | 'failed'>('idle');
   // My plan: their own note, and a one-tap call to their person (shown whenever they saved one).
@@ -38,15 +40,15 @@ export function Done({ protocolId, completedAt }: DoneProps) {
     <Screen
       bottom={
         <BottomBar>
-          <CalmButton onClick={() => navigate({ view: 'reset', protocolId })}>Again</CalmButton>
-          <CalmButton onClick={() => navigate('home')}>Home</CalmButton>
+          <CalmButton onClick={() => navigate({ view: 'reset', protocolId })}>{s.done.again}</CalmButton>
+          <CalmButton onClick={() => navigate('home')}>{s.common.home}</CalmButton>
         </BottomBar>
       }
     >
       <div className="flex flex-1 flex-col justify-center gap-10 py-6">
         <h1 tabIndex={-1} className="text-3xl leading-tight font-semibold tracking-tight text-ink outline-none">
-          You did it.
-          <span className="block text-muted">It always passes.</span>
+          {s.done.title}
+          <span className="block text-muted">{s.done.subtitle}</span>
         </h1>
 
         {(note || tel) && (
@@ -63,7 +65,7 @@ export function Done({ protocolId, completedAt }: DoneProps) {
                 <svg viewBox="0 0 24 24" aria-hidden="true" className="size-5 text-accent" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" />
                 </svg>
-                {callLabel(plan)}
+                {callLabel(plan, s)}
               </a>
             )}
           </div>
@@ -71,23 +73,23 @@ export function Done({ protocolId, completedAt }: DoneProps) {
 
         <section aria-labelledby="what-helped" className="flex flex-col gap-3">
           <h2 id="what-helped" className="text-lg text-ink">
-            What helped?
+            {s.done.whatHelped}
           </h2>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,9rem),1fr))] gap-3">
-            {HELPED_OPTIONS.map(({ value, label }) => (
+            {HELPED_VALUES.map((value) => (
               <CalmButton
                 key={value}
                 aria-pressed={helped === value}
                 onClick={() => void answer(value)}
                 className={cx('ring-2', helped === value ? 'text-ink ring-accent' : 'ring-transparent')}
               >
-                {label}
+                {s.helped[value]}
               </CalmButton>
             ))}
           </div>
           <p aria-live="polite" className="min-h-6 text-sm text-muted">
-            {saveState === 'saved' && 'Saved on this device only.'}
-            {saveState === 'failed' && 'Couldn’t save on this device.'}
+            {saveState === 'saved' && s.common.savedOnDevice}
+            {saveState === 'failed' && s.common.saveFailed}
           </p>
         </section>
 

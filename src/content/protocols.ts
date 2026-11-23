@@ -1,5 +1,6 @@
 import type { BreathingPhase, GroundingPhase, GroundingStep, LinesPhase, Protocol } from '../engine';
 import { getBreathPattern, type BreathTiming } from './breathPatterns';
+import { en } from './strings';
 
 /**
  * All bundled protocols. Content is data: adding a protocol means adding an
@@ -23,11 +24,11 @@ const breathing = (cycles: number, pattern: BreathTiming = BREATH_4_2_6): Breath
 });
 
 const STEPS_54321: readonly GroundingStep[] = [
-  { sense: 'see', count: 5, prompt: 'Find 5 things you can see.' },
-  { sense: 'touch', count: 4, prompt: 'Notice 4 things you can touch.' },
-  { sense: 'hear', count: 3, prompt: 'Listen for 3 sounds.' },
-  { sense: 'smell', count: 2, prompt: 'Notice 2 things you can smell.' },
-  { sense: 'taste', count: 1, prompt: 'Notice 1 thing you can taste.' },
+  { sense: 'see', count: 5, prompt: en.grounding.see },
+  { sense: 'touch', count: 4, prompt: en.grounding.touch },
+  { sense: 'hear', count: 3, prompt: en.grounding.hear },
+  { sense: 'smell', count: 2, prompt: en.grounding.smell },
+  { sense: 'taste', count: 1, prompt: en.grounding.taste },
 ];
 
 const grounding = (secPerStep: number): GroundingPhase => ({ kind: 'grounding', steps: STEPS_54321, secPerStep });
@@ -39,21 +40,21 @@ const lines = (secPerLine: number, ...text: string[]): LinesPhase => ({ kind: 'l
 /** 4×12s breathing (48s) + 5×6s grounding (30s) + 3×5s lines (15s) = 93s. */
 export const classic90 = {
   id: 'classic-90',
-  name: 'Classic reset',
-  description: 'Breathe, ground, settle. The full 90 seconds.',
+  name: en.protocols['classic-90'].name,
+  description: en.protocols['classic-90'].description,
   approxSeconds: 90,
   phases: [
     breathing(4),
     grounding(6),
-    lines(5, 'This always passes.', 'You are safe right now.', 'Just breathe with the circle.'),
+    lines(5, en.calm.passes, en.calm.safe, en.calm.circle),
   ],
 } as const satisfies Protocol;
 
 /** 5×12s = 60s. */
 export const breathing60 = {
   id: 'breathing-60',
-  name: 'Just breathing',
-  description: 'One minute of slow breathing with the circle.',
+  name: en.protocols['breathing-60'].name,
+  description: en.protocols['breathing-60'].description,
   approxSeconds: 60,
   phases: [breathing(5)],
   // Library opens the pattern picker first; the step stays ~60s whichever pattern is picked.
@@ -63,10 +64,10 @@ export const breathing60 = {
 /** 5×6s grounding (30s) + 2×5s lines (10s) = 40s. */
 export const groundingOnly = {
   id: 'grounding-only',
-  name: 'Just grounding',
-  description: '5-4-3-2-1: come back through your senses.',
+  name: en.protocols['grounding-only'].name,
+  description: en.protocols['grounding-only'].description,
   approxSeconds: 40,
-  phases: [grounding(6), lines(5, 'This always passes.', 'You are safe right now.')],
+  phases: [grounding(6), lines(5, en.calm.passes, en.calm.safe)],
 } as const satisfies Protocol;
 
 // ─── More ways ────────────────────────────────────────────────────────────────
@@ -74,8 +75,8 @@ export const groundingOnly = {
 /** 4×16s = 64s. */
 export const boxBreathing = {
   id: 'box-breathing',
-  name: 'Box breathing',
-  description: 'In, hold, out, hold: four even counts.',
+  name: en.protocols['box-breathing'].name,
+  description: en.protocols['box-breathing'].description,
   approxSeconds: 65,
   phases: [breathing(4, getBreathPattern('box').timing)],
 } as const satisfies Protocol;
@@ -83,20 +84,20 @@ export const boxBreathing = {
 /** 6×12s breathing (72s) + 5×12s grounding (60s) + 6×8s lines (48s) = 180s. */
 export const extended3min = {
   id: 'extended-3min',
-  name: 'Extended reset',
-  description: 'A slower, longer reset for when 90 seconds isn’t enough.',
+  name: en.protocols['extended-3min'].name,
+  description: en.protocols['extended-3min'].description,
   approxSeconds: 180,
   phases: [
     breathing(6),
     grounding(12),
     lines(
       8,
-      'This always passes.',
-      'You are safe right now.',
-      'Each breath slows things down.',
-      'Nothing to fix. Just breathe.',
-      'Your body knows how to settle.',
-      'Just breathe with the circle.',
+      en.calm.passes,
+      en.calm.safe,
+      en.calm.slower,
+      en.calm.nothing,
+      en.calm.body,
+      en.calm.circle,
     ),
   ],
 } as const satisfies Protocol;
@@ -104,8 +105,8 @@ export const extended3min = {
 /** 4×14s = 56s. Longer exhale, silent, extra-dim for the middle of the night. */
 export const nightProtocol = {
   id: 'night-protocol',
-  name: 'Night reset',
-  description: 'Extra dim and silent, with a longer exhale.',
+  name: en.protocols['night-protocol'].name,
+  description: en.protocols['night-protocol'].description,
   approxSeconds: 55,
   noTones: true,
   extraDim: true,

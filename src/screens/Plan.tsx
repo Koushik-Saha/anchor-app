@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useNavigation } from '../app/navigation';
+import { useStrings } from '../app/settings';
 import { PLAN_LIMITS } from '../app/plan';
 import { getCachedPlan, savePlan } from '../app/planStore';
 import { BottomBar } from '../components/BottomBar';
@@ -41,6 +42,7 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 }
 
 function PlanForm() {
+  const s = useStrings();
   // Starts from the startup cache: the form is complete on its first frame.
   const [fields, setFields] = useState<Fields>(() => ({ ...EMPTY, ...getCachedPlan() }));
   const [saved, setSaved] = useState(false);
@@ -85,10 +87,10 @@ function PlanForm() {
           <rect x="3" y="7" width="10" height="7" rx="1.5" />
           <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
         </svg>
-        This never leaves your device.
+        {s.plan.private}
       </p>
 
-      <Field label="Note to self" hint="Shown after every reset.">
+      <Field label={s.plan.noteLabel} hint={s.plan.noteHint}>
         {({ input, hint }) => (
           <textarea
             {...PRIVATE_FIELD}
@@ -97,7 +99,7 @@ function PlanForm() {
             rows={2}
             maxLength={PLAN_LIMITS.note}
             value={fields.note}
-            placeholder="This passes. You are safe."
+            placeholder={s.plan.notePlaceholder}
             onChange={(e) => update('note', e.target.value)}
             className={cx(inputClass, 'resize-none')}
           />
@@ -105,8 +107,8 @@ function PlanForm() {
       </Field>
 
       <fieldset className="flex flex-col gap-3">
-        <legend className="mb-1.5 text-ink">Emergency contact</legend>
-        <Field label="Name">
+        <legend className="mb-1.5 text-ink">{s.plan.contact}</legend>
+        <Field label={s.plan.name}>
           {({ input }) => (
             <input
               {...PRIVATE_FIELD}
@@ -120,7 +122,7 @@ function PlanForm() {
             />
           )}
         </Field>
-        <Field label="Phone" hint="One tap to call from the screen after a reset.">
+        <Field label={s.plan.phone} hint={s.plan.phoneHint}>
           {({ input, hint }) => (
             <input
               {...PRIVATE_FIELD}
@@ -138,7 +140,7 @@ function PlanForm() {
         </Field>
       </fieldset>
 
-      <Field label="Private note (optional)" hint="Only shown here — for example, a medication reminder.">
+      <Field label={s.plan.privateLabel} hint={s.plan.privateHint}>
         {({ input, hint }) => (
           <textarea
             {...PRIVATE_FIELD}
@@ -154,7 +156,7 @@ function PlanForm() {
       </Field>
 
       <p aria-live="polite" className="min-h-5 text-sm text-muted">
-        {saved && 'Saved on this device only.'}
+        {saved && s.common.savedOnDevice}
       </p>
 
       <button
@@ -162,7 +164,7 @@ function PlanForm() {
         onClick={() => void deletePlan()}
         className={cx('min-h-12 self-start rounded-xl px-1 text-muted underline underline-offset-4', focusRing)}
       >
-        Delete my plan
+        {s.plan.delete}
       </button>
     </div>
   );
@@ -170,15 +172,16 @@ function PlanForm() {
 
 export function Plan() {
   const { navigate } = useNavigation();
+  const s = useStrings();
   return (
     <Screen
       bottom={
         <BottomBar>
-          <CalmButton onClick={() => navigate('home')}>Home</CalmButton>
+          <CalmButton onClick={() => navigate('home')}>{s.common.home}</CalmButton>
         </BottomBar>
       }
     >
-      <ScreenTitle>My plan</ScreenTitle>
+      <ScreenTitle>{s.plan.title}</ScreenTitle>
       <PlanForm />
     </Screen>
   );

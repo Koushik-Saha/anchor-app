@@ -9,6 +9,7 @@ import {
 } from '../app/builder';
 import { deleteCustomReset, getCachedCustomReset, saveCustomReset } from '../app/customResetStore';
 import { useNavigation } from '../app/navigation';
+import { useStrings } from '../app/settings';
 import { BigButton } from '../components/BigButton';
 import { BottomBar } from '../components/BottomBar';
 import { CalmButton } from '../components/CalmButton';
@@ -23,26 +24,17 @@ import { formatDuration } from '../content/format';
 import { CUSTOM_NAME_MAX, type CustomReset } from '../platform/storage';
 
 const BREATH_LENGTHS = [30, 60, 90] as const;
-const LINE_LENGTHS = [
-  { value: 'short', label: 'Short' },
-  { value: 'standard', label: 'Standard' },
-] as const;
-
-const TITLES: Readonly<Record<BuilderStage, string>> = {
-  steps: 'Pick your steps',
-  pattern: 'Pick a rhythm',
-  'breath-length': 'How long to breathe?',
-  'lines-length': 'How many calm lines?',
-  name: 'Name it',
-};
+const LINE_LENGTHS = ['short', 'standard'] as const;
 
 /** One decision per screen. Nothing is saved until the last one. */
 export function Builder() {
   const { navigate } = useNavigation();
+  const s = useStrings();
+  const blank: CustomReset = { ...NEW_CUSTOM_RESET, name: s.builder.defaultName };
   const [saved, setSaved] = useState(getCachedCustomReset);
   const [editing, setEditing] = useState(!saved);
   const [stage, setStage] = useState<BuilderStage>('steps');
-  const [draft, setDraft] = useState<CustomReset>(saved ?? NEW_CUSTOM_RESET);
+  const [draft, setDraft] = useState<CustomReset>(saved ?? blank);
   const [saveFailed, setSaveFailed] = useState(false);
   const nameId = useId();
 
@@ -56,33 +48,33 @@ export function Builder() {
   const remove = async () => {
     await deleteCustomReset();
     setSaved(undefined);
-    setDraft(NEW_CUSTOM_RESET);
+    setDraft(blank);
     setStage('steps');
     setEditing(true);
   };
   const save = async () => {
-    if (await saveCustomReset(draft)) navigate('library');
+    if (await saveCustomReset({ ...draft, name: draft.name.trim() || s.builder.defaultName })) navigate('library');
     else setSaveFailed(true);
   };
 
   if (!editing && saved) {
-    const protocol = customProtocol(saved);
+    const protocol = customProtocol(saved, s);
     return (
       <Screen
         bottom={
           <BottomBar>
-            <CalmButton onClick={() => navigate('library')}>Library</CalmButton>
+            <CalmButton onClick={() => navigate('library')}>{s.common.library}</CalmButton>
           </BottomBar>
         }
       >
-        <ScreenTitle subtitle={`${protocol.description} · ${formatDuration(protocol.approxSeconds)}`}>
+        <ScreenTitle subtitle={`${protocol.description} · ${formatDuration(protocol.approxSeconds, s.units)}`}>
           <span className="[overflow-wrap:anywhere]">{saved.name}</span>
         </ScreenTitle>
         <div className="flex flex-col gap-3">
-          <BigButton onClick={() => navigate({ view: 'reset', protocolId: CUSTOM_RESET_ID })}>Start</BigButton>
-          <CalmButton onClick={() => setEditing(true)}>Change it</CalmButton>
+          <BigButton onClick={() => navigate({ view: 'reset', protocolId: CUSTOM_RESET_ID })}>{s.builder.start}</BigButton>
+          <CalmButton onClick={() => setEditing(true)}>{s.builder.change}</CalmButton>
           <CalmButton variant="quiet" onClick={() => void remove()}>
-            Delete it
+            {s.builder.delete}
           </CalmButton>
         </div>
         <div className="mt-auto pt-6">
@@ -96,21 +88,21 @@ export function Builder() {
     <Screen
       bottom={
         <BottomBar>
-          {back && <CalmButton onClick={() => setStage(back)}>Back</CalmButton>}
-          <CalmButton onClick={() => navigate('library')}>Close</CalmButton>
+          {back && <CalmButton onClick={() => setStage(back)}>{s.common.back}</CalmButton>}
+          <CalmButton onClick={() => navigate('library')}>{s.common.close}</CalmButton>
         </BottomBar>
       }
     >
-      <ScreenTitle subtitle={stage === 'steps' ? 'Tap in order. Breathing is required.' : undefined}>{TITLES[stage]}</ScreenTitle>
+      <ScreenTitle subtitle={stage === 'steps' ? s.builder.stepsHint : undefined}>{s.builder.titles[stage]}</ScreenTitle>
 
       {stage === 'steps' && (
         <div className="flex flex-col gap-3">
-          {CUSTOM_STEPS.map(({ value, label }) => {
+          {CUSTOM_STEPS.map((value) => {
             const place = draft.steps.indexOf(value);
             return (
               <ChoiceButton
                 key={value}
-                title={label}
+                title={s.builder.steps[value]}
                 selected={place >= 0}
                 selectedAs="pressed"
                 badge={place >= 0 ? String(place + 1) : undefined}
@@ -119,7 +111,7 @@ export function Builder() {
             );
           })}
           <BigButton disabled={!canLeaveSteps(draft.steps)} onClick={next}>
-            Next
+            {s.common.next}
           </BigButton>
         </div>
       )}
@@ -129,8 +121,8 @@ export function Builder() {
           {BREATH_PATTERNS.map((pattern) => (
             <ChoiceButton
               key={pattern.id}
-              title={pattern.name}
-              line={pattern.line}
+              title={s.patterns[pattern.id].name}
+              line={s.patterns[pattern.id].line}
               selected={draft.patternId === pattern.id}
               onClick={() => choose({ patternId: pattern.id })}
             />
@@ -141,15 +133,15 @@ export function Builder() {
       {stage === 'breath-length' && (
         <div className="flex flex-col gap-3">
           {BREATH_LENGTHS.map((sec) => (
-            <ChoiceButton key={sec} title={`${sec} seconds`} selected={draft.breathSec === sec} onClick={() => choose({ breathSec: sec })} />
+            <ChoiceButton key={sec} title={s.builder.seconds(sec)} selected={draft.breathSec === sec} onClick={() => choose({ breathSec: sec })} />
           ))}
         </div>
       )}
 
       {stage === 'lines-length' && (
         <div className="flex flex-col gap-3">
-          {LINE_LENGTHS.map(({ value, label }) => (
-            <ChoiceButton key={value} title={label} selected={draft.linesLength === value} onClick={() => choose({ linesLength: value })} />
+          {LINE_LENGTHS.map((value) => (
+            <ChoiceButton key={value} title={s.builder.lineLengths[value]} selected={draft.linesLength === value} onClick={() => choose({ linesLength: value })} />
           ))}
         </div>
       )}
@@ -157,7 +149,7 @@ export function Builder() {
       {stage === 'name' && (
         <div className="flex flex-col gap-4">
           <label htmlFor={nameId} className="text-ink">
-            Short name
+            {s.builder.nameLabel}
           </label>
           <input
             {...PRIVATE_FIELD}
@@ -169,9 +161,9 @@ export function Builder() {
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
             className="min-h-tap w-full rounded-2xl bg-surface px-4 py-3 text-xl text-ink focus-visible:outline-2 focus-visible:outline-accent"
           />
-          <BigButton onClick={() => void save()}>Save</BigButton>
+          <BigButton onClick={() => void save()}>{s.common.save}</BigButton>
           <p aria-live="polite" className="min-h-6 text-sm text-muted">
-            {saveFailed && 'Couldn’t save on this device.'}
+            {saveFailed && s.common.saveFailed}
           </p>
         </div>
       )}

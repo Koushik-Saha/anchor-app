@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { resolveProtocol } from '../app/customResetStore';
 import { useNavigation, type ResetId } from '../app/navigation';
-import { useSettings } from '../app/settings';
+import { useSettings, useStrings } from '../app/settings';
 import { useReducedMotion } from '../app/useReducedMotion';
 import { BigButton } from '../components/BigButton';
 import { createCircleAnimator } from '../components/breathCircle';
@@ -11,6 +11,7 @@ import { ProgressDots } from '../components/ProgressDots';
 import { protocolWithChosenPattern } from '../content/breathPatterns';
 import { cueText } from '../content/cueText';
 import { CUSTOM_RESET_ID } from '../content/customReset';
+import { localizeProtocol } from '../content/localize';
 import { defaultProtocol } from '../content/protocols';
 import { createResetEngine, cueAt, type BreathPart, type ResetEngine } from '../engine';
 import * as audio from '../platform/audio';
@@ -23,13 +24,14 @@ import * as wakeLock from '../platform/wakeLock';
 export function Reset({ protocolId }: { protocolId: ResetId }) {
   const { navigate } = useNavigation();
   const { settings } = useSettings();
+  const s = useStrings();
   const reducedMotion = useReducedMotion();
   // Protocols with `choosePattern` breathe the person's last-picked pattern; others run as written.
   // Memoised on the ids so the engine isn't recreated on unrelated settings changes.
   const patternId = settings.breathPattern;
   const protocol = useMemo(
-    () => protocolWithChosenPattern(resolveProtocol(protocolId) ?? defaultProtocol, patternId),
-    [protocolId, patternId],
+    () => localizeProtocol(protocolWithChosenPattern(resolveProtocol(protocolId) ?? defaultProtocol, patternId), s),
+    [protocolId, patternId, s],
   );
 
   // History keeps a custom reset's own name; built-ins are looked up by id.
@@ -74,6 +76,7 @@ export function Reset({ protocolId }: { protocolId: ResetId }) {
 
   // Layout effect: the first cue is painted on the very first frame — no empty flash.
   useLayoutEffect(() => {
+    const breathLabels = s.breath;
     const engine = createResetEngine(protocol);
     engineRef.current = engine;
     const animateCircle = createCircleAnimator();
@@ -105,7 +108,7 @@ export function Reset({ protocolId }: { protocolId: ResetId }) {
           lastPart = cue.part;
         }
 
-        const next = cueText(cue);
+        const next = cueText(cue, breathLabels);
         if (next !== lastText) {
           lastText = next;
           setText(next);
@@ -151,7 +154,7 @@ export function Reset({ protocolId }: { protocolId: ResetId }) {
       engineRef.current = null;
       void wakeLock.release();
     };
-  }, [protocol, protocolId]);
+  }, [protocol, protocolId, s]);
 
   const skip = () => engineRef.current?.skipPhase();
   // No confirmation, no "are you sure" — leaving is always fine.
@@ -202,11 +205,11 @@ export function Reset({ protocolId }: { protocolId: ResetId }) {
       <header className="flex shrink-0 justify-end pt-safe">
         {/* Not visible (≤ 8 words on screen), but names the screen for assistive tech; focused on arrival. */}
         <h1 tabIndex={-1} className="sr-only">
-          Reset
+          {s.reset.title}
         </h1>
         <button
           type="button"
-          aria-label="Close"
+          aria-label={s.reset.close}
           onClick={close}
           className={cx('grid size-tap place-items-center rounded-2xl text-muted active:text-ink', focusRing)}
         >
@@ -245,12 +248,12 @@ export function Reset({ protocolId }: { protocolId: ResetId }) {
 
           {interrupted ? (
             <div className="flex w-full flex-col items-center gap-4">
-              <p className="text-[1.75rem] leading-tight font-medium text-ink">Welcome back.</p>
+              <p className="text-[1.75rem] leading-tight font-medium text-ink">{s.reset.welcomeBack}</p>
               <BigButton ref={resumeRef} onClick={() => engineRef.current?.resume()}>
-                Resume
+                {s.reset.resume}
               </BigButton>
               <CalmButton className="w-full" onClick={() => engineRef.current?.restart()}>
-                Start over
+                {s.reset.startOver}
               </CalmButton>
             </div>
           ) : (
@@ -269,7 +272,7 @@ export function Reset({ protocolId }: { protocolId: ResetId }) {
 
       <footer className="flex shrink-0 justify-end pt-4 pb-safe">
         <CalmButton className="min-w-28" onClick={skip}>
-          Skip
+          {s.reset.skip}
         </CalmButton>
       </footer>
     </div>

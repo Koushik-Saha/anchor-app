@@ -1,9 +1,11 @@
+import { useStrings } from '../app/settings';
 import { cx } from './cx';
 
 /** One small dot per phase: done, current, upcoming. */
 export function ProgressDots({ count, current }: { count: number; current: number }) {
+  const s = useStrings();
   return (
-    <div role="img" aria-label={`Part ${current + 1} of ${count}`} className="flex items-center gap-2">
+    <div role="img" aria-label={s.reset.progress(current + 1, count)} className="flex items-center gap-2">
       {Array.from({ length: count }, (_, i) => (
         <span
           key={i}

@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Helped, HistoryEntry } from '../platform/storage';
 import {
-  formatHour,
   majorityOf,
   MIN_RESETS,
   NO_PATTERNS_YET,
@@ -25,7 +24,7 @@ const spread = (helped: (Helped | undefined)[]): HistoryEntry[] => {
 };
 const ofKind = <K extends WhatHelpedStatement['kind']>(list: WhatHelpedStatement[], kind: K) =>
   list.find((s): s is Extract<WhatHelpedStatement, { kind: K }> => s.kind === kind);
-const texts = (history: HistoryEntry[]) => whatHelpedStatements(history).map(statementText);
+const texts = (history: HistoryEntry[]) => whatHelpedStatements(history).map((statement) => statementText(statement));
 
 describe('majorityOf', () => {
   it('finds a value held by more than half', () => {
@@ -113,8 +112,8 @@ describe('time of day', () => {
     expect(ofKind(whatHelpedStatements(bad), 'time')).toBeUndefined();
   });
 
-  it.each([[0, '12 am'], [1, '1 am'], [11, '11 am'], [12, '12 pm'], [13, '1 pm'], [23, '11 pm']])('%i → %s', (hour, text) => {
-    expect(formatHour(hour)).toBe(text);
+  it.each([[0, '12 am'], [1, '1 am'], [11, '11 am'], [12, '12 pm'], [13, '1 pm'], [23, '11 pm']] as const)('%i → %s', (hour, text) => {
+    expect(statementText({ kind: 'time', hour })).toBe(`You use Anchor most around ${text}.`);
   });
 });
 

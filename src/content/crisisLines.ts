@@ -1,4 +1,5 @@
 import type { CrisisChoice, CrisisRegion } from '../platform/storage';
+import { en, type Strings } from './strings';
 
 /**
  * Crisis lines, bundled with the app (no lookup, works offline). Numbers and service
@@ -21,35 +22,41 @@ export interface CrisisLineInfo {
   extra?: string;
 }
 
-const callOrText988 = (service: string): readonly CrisisSegment[] => [
-  { text: 'Call', href: 'tel:988', ariaLabel: `Call 988, ${service}` },
-  { text: ' or ' },
-  { text: 'text', href: 'sms:988', ariaLabel: `Text 988, ${service}` },
-  { text: ` 988 (${service})` },
-];
+function callOrText988(c: Strings['crisis'], service: string): readonly CrisisSegment[] {
+  return [
+    { text: c.call, href: 'tel:988', ariaLabel: c.callAria(service) },
+    { text: c.or },
+    { text: c.text, href: 'sms:988', ariaLabel: c.textAria(service) },
+    { text: `${c.number988} (${service})` },
+  ];
+}
 
 const callOnly = (text: string, digits: string): readonly CrisisSegment[] => [
   { text, href: `tel:${digits}`, ariaLabel: text },
 ];
 
-const US_SEGMENTS = callOrText988('Suicide and Crisis Lifeline');
+function buildLines(s: Strings): Readonly<Record<CrisisRegion, CrisisLineInfo>> {
+  const c = s.crisis;
+  const usSegments = callOrText988(c, c.usService);
+  return {
+    us: { region: 'us', segments: usSegments },
+    ca: { region: 'ca', segments: callOrText988(c, c.caService) },
+    'uk-ie': { region: 'uk-ie', segments: callOnly(c.samaritans, '116123') },
+    au: { region: 'au', segments: callOnly(c.lifeline, '131114') },
+    other: { region: 'other', segments: usSegments, extra: c.elsewhere },
+  };
+}
 
-export const CRISIS_LINES: Readonly<Record<CrisisRegion, CrisisLineInfo>> = {
-  us: { region: 'us', segments: US_SEGMENTS },
-  ca: { region: 'ca', segments: callOrText988('Suicide Prevention Service') }, // copy-scan-ok: a service name
-  'uk-ie': { region: 'uk-ie', segments: callOnly('Call Samaritans free, 116 123', '116123') },
-  au: { region: 'au', segments: callOnly('Call Lifeline, 13 11 14', '131114') },
-  other: { region: 'other', segments: US_SEGMENTS, extra: 'or your local emergency number' },
-};
+export const CRISIS_LINES = buildLines(en);
 
-/** The choices in Settings, in display order. */
-export const CRISIS_CHOICES: readonly { value: CrisisChoice; label: string }[] = [
-  { value: 'auto', label: 'Automatic' },
-  { value: 'us', label: 'United States' },
-  { value: 'ca', label: 'Canada' },
-  { value: 'uk-ie', label: 'UK & Ireland' },
-  { value: 'au', label: 'Australia' },
-  { value: 'other', label: 'Anywhere else' },
+/** The choices in Settings, in display order (labels are in the strings table). */
+export const CRISIS_CHOICES: readonly { value: CrisisChoice }[] = [
+  { value: 'auto' },
+  { value: 'us' },
+  { value: 'ca' },
+  { value: 'uk-ie' },
+  { value: 'au' },
+  { value: 'other' },
 ];
 
 const REGION_BY_COUNTRY: Readonly<Record<string, CrisisRegion>> = {
@@ -82,8 +89,8 @@ export function regionFromLocales(locales: readonly string[]): CrisisRegion {
 }
 
 /** A manual choice in Settings always wins over the device locale. */
-export function resolveCrisisLine(choice: CrisisChoice, locales: readonly string[]): CrisisLineInfo {
-  return CRISIS_LINES[choice === 'auto' ? regionFromLocales(locales) : choice];
+export function resolveCrisisLine(choice: CrisisChoice, locales: readonly string[], s: Strings = en): CrisisLineInfo {
+  return buildLines(s)[choice === 'auto' ? regionFromLocales(locales) : choice];
 }
 
 /** The line as plain text (no links). */

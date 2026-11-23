@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { HELPED_OPTIONS, formatDuration, formatWhen, helpedLabel } from './format';
+import { HELPED_VALUES, formatDuration, formatWhen, helpedLabel } from './format';
 import { protocols } from './protocols';
 
 describe('formatDuration', () => {
@@ -20,7 +20,7 @@ describe('formatDuration', () => {
 
 describe('helped labels', () => {
   it('cover all four answers in order', () => {
-    expect(HELPED_OPTIONS.map((o) => o.label)).toEqual(['Breathing', 'Grounding', 'Both', 'Not sure']);
+    expect(HELPED_VALUES.map((value) => helpedLabel(value))).toEqual(['Breathing', 'Grounding', 'Both', 'Not sure']);
     expect(helpedLabel('not-sure')).toBe('Not sure');
   });
 });

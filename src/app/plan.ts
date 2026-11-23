@@ -1,3 +1,4 @@
+import { en, type Strings } from '../content/strings';
 import type { PanicPlan } from '../platform/storage';
 
 /** Field limits: short enough to read at a glance on the Done screen. */
@@ -26,9 +27,9 @@ export function planOnDone(plan: PanicPlan | undefined): { note: string | undefi
 }
 
 /** Label for the one-tap call button on Done. */
-export function callLabel(plan: PanicPlan | undefined): string {
+export function callLabel(plan: PanicPlan | undefined, s: Strings = en): string {
   const name = plan?.contactName?.trim();
-  return name ? `Call ${name}` : 'Call my contact';
+  return name ? s.done.call(name) : s.done.callContact;
 }
 
 /** Trims fields and drops empty ones, so an emptied field truly disappears. */
