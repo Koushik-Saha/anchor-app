@@ -10,6 +10,7 @@ export type Route =
   | { view: 'library' }
   | { view: 'plan' }
   | { view: 'history' }
+  | { view: 'what-helped' }
   | { view: 'settings' }
   /** `runId` changes when a shortcut restarts a reset that is already on screen. */
   | { view: 'reset'; protocolId: ProtocolId; runId?: number }
@@ -21,7 +22,7 @@ export type Route =
 export type View = Route['view'];
 
 /** Views that need no data can be navigated to by name. */
-export type SimpleView = 'home' | 'library' | 'plan' | 'history' | 'settings';
+export type SimpleView = 'home' | 'library' | 'plan' | 'history' | 'what-helped' | 'settings';
 
 export interface Navigation {
   route: Route;

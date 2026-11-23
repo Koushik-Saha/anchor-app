@@ -114,7 +114,7 @@ CI (`.github/workflows/ci.yml`) runs typecheck → lint → test → build → s
   - Haptics/audio gate themselves on `settings.haptics` / `settings.sound` (synced by `SettingsProvider`). Audio needs `audio.prime()` from a tap handler (e.g. Start reset) before timer-driven tones will play on iOS.
   - Stored data is untrusted (old/corrupt): read through the typed helpers, which normalise it.
 - `src/app` — app-wide state: `navigation.ts` (`View` type + `useNavigation()`), `settings.ts` (`useSettings()`, defaults, normalisation), `SettingsProvider.tsx`. Settings are loaded before first render in `main.tsx`.
-- `src/screens` — Home, Reset, Done, Library, PatternPicker, Plan, History, Settings. Navigation is a view-state switch in `App.tsx` (no router) — call `useNavigation().navigate('library')`.
+- `src/screens` — Home, Reset, Done, Library, PatternPicker, Plan, History, WhatHelped, Settings. Navigation is a view-state switch in `App.tsx` (no router) — call `useNavigation().navigate('library')`.
 - `src/components` — shared UI. Use these instead of one-off styles:
   - `Screen` — page layout (480px column, safe areas); `bottom` prop for a `BottomBar`.
   - `BigButton` — primary action, accent, min 96px. One per screen at most.
@@ -152,6 +152,10 @@ CI (`.github/workflows/ci.yml`) runs typecheck → lint → test → build → s
 
 - My plan fields are private: keep `PRIVATE_FIELD` (no spellcheck/grammar extensions) on every input that holds personal text.
 - `src/app/planStore.ts` caches the plan at startup; Done shows the person's note and a one-tap call to their contact.
+
+## What helped
+
+- `src/app/whatHelped.ts` turns on-device history into a few lines, using only counts and strict majorities over completed resets (at least 3). It's computed on open and never stored. No advice, scores or outcome claims: the lines only repeat the person's own answers.
 
 ## History: the paid unlock (removed 2026-11-22)
 

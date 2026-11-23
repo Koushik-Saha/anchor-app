@@ -53,6 +53,9 @@ export function Home() {
         <CalmButton variant="quiet" onClick={() => navigate('plan')}>
           My plan
         </CalmButton>
+        <CalmButton variant="quiet" onClick={() => navigate('what-helped')}>
+          What helped
+        </CalmButton>
         <CalmButton variant="quiet" onClick={() => navigate('settings')}>
           Settings
         </CalmButton>

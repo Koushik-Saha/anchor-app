@@ -11,6 +11,7 @@ import { PatternPicker } from './screens/PatternPicker';
 import { Plan } from './screens/Plan';
 import { Reset } from './screens/Reset';
 import { Settings } from './screens/Settings';
+import { WhatHelped } from './screens/WhatHelped';
 
 function renderRoute(route: Route): ReactElement {
   switch (route.view) {
@@ -28,6 +29,8 @@ function renderRoute(route: Route): ReactElement {
       return <Plan />;
     case 'history':
       return <History />;
+    case 'what-helped':
+      return <WhatHelped />;
     case 'settings':
       return <Settings />;
   }
