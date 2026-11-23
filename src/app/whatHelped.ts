@@ -56,9 +56,11 @@ function timeStatement(completed: readonly HistoryEntry[]): WhatHelpedStatement 
 
 function mostUsedStatement(completed: readonly HistoryEntry[]): WhatHelpedStatement | null {
   if (completed.length < MIN_RESETS) return null;
-  const top = majorityOf(completed.map((e) => e.protocolId));
-  const name = top && getProtocol(top.value)?.name;
-  return top && name ? { kind: 'most-used', protocolId: top.value, name } : null;
+  // A custom reset counts under the name it ran with, so a rebuilt one isn't merged with the old.
+  const top = majorityOf(completed.map((e) => e.protocolName ?? e.protocolId));
+  const entry = top && completed.find((e) => (e.protocolName ?? e.protocolId) === top.value);
+  const name = entry && (entry.protocolName ?? getProtocol(entry.protocolId)?.name);
+  return entry && name ? { kind: 'most-used', protocolId: entry.protocolId, name } : null;
 }
 
 /** Only finished resets count. An empty list means: show the calm "not yet" line. */

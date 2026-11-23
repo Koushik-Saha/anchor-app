@@ -9,7 +9,7 @@ import { getProtocol } from '../content/protocols';
 import { storage, type HistoryEntry } from '../platform/storage';
 
 function HistoryRow({ entry }: { entry: HistoryEntry }) {
-  const name = getProtocol(entry.protocolId)?.name ?? 'Reset';
+  const name = entry.protocolName ?? getProtocol(entry.protocolId)?.name ?? 'Reset';
   return (
     <li className="flex flex-col gap-1 rounded-2xl bg-surface px-5 py-4">
       <span className="flex flex-wrap items-baseline justify-between gap-x-3">

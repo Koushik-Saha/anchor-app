@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useNavigation } from '../app/navigation';
+import { resolveProtocol } from '../app/customResetStore';
+import { useNavigation, type ResetId } from '../app/navigation';
 import { useSettings } from '../app/settings';
 import { useReducedMotion } from '../app/useReducedMotion';
 import { BigButton } from '../components/BigButton';
@@ -9,7 +10,8 @@ import { cx, focusRing } from '../components/cx';
 import { ProgressDots } from '../components/ProgressDots';
 import { protocolWithChosenPattern } from '../content/breathPatterns';
 import { cueText } from '../content/cueText';
-import { defaultProtocol, getProtocol, type ProtocolId } from '../content/protocols';
+import { CUSTOM_RESET_ID } from '../content/customReset';
+import { defaultProtocol } from '../content/protocols';
 import { createResetEngine, cueAt, type BreathPart, type ResetEngine } from '../engine';
 import * as audio from '../platform/audio';
 import * as haptics from '../platform/haptics';
@@ -18,7 +20,7 @@ import * as wakeLock from '../platform/wakeLock';
 
 // Reset-flow rules (CLAUDE.md 7): ≤ 8 words on screen, every tap target ≥ 64px,
 // Skip and ✕ always visible, no popups, no guilt.
-export function Reset({ protocolId }: { protocolId: ProtocolId }) {
+export function Reset({ protocolId }: { protocolId: ResetId }) {
   const { navigate } = useNavigation();
   const { settings } = useSettings();
   const reducedMotion = useReducedMotion();
@@ -26,9 +28,12 @@ export function Reset({ protocolId }: { protocolId: ProtocolId }) {
   // Memoised on the ids so the engine isn't recreated on unrelated settings changes.
   const patternId = settings.breathPattern;
   const protocol = useMemo(
-    () => protocolWithChosenPattern(getProtocol(protocolId) ?? defaultProtocol, patternId),
+    () => protocolWithChosenPattern(resolveProtocol(protocolId) ?? defaultProtocol, patternId),
     [protocolId, patternId],
   );
+
+  // History keeps a custom reset's own name; built-ins are looked up by id.
+  const historyName = protocolId === CUSTOM_RESET_ID ? { protocolName: protocol.name } : {};
 
   const circleRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<ResetEngine | null>(null);
@@ -61,9 +66,10 @@ export function Reset({ protocolId }: { protocolId: ProtocolId }) {
     navigate,
     reducedMotion,
     tonePitch: settings.tonePitch,
+    historyName,
   });
   useEffect(() => {
-    live.current = { navigate, reducedMotion, tonePitch: settings.tonePitch };
+    live.current = { navigate, reducedMotion, tonePitch: settings.tonePitch, historyName };
   });
 
   // Layout effect: the first cue is painted on the very first frame — no empty flash.
@@ -117,6 +123,7 @@ export function Reset({ protocolId }: { protocolId: ProtocolId }) {
         void storage.addHistoryEntry({
           at: completedAt,
           protocolId,
+          ...live.current.historyName,
           completed: true,
         });
         live.current.navigate({ view: 'done', protocolId, completedAt });
@@ -138,7 +145,7 @@ export function Reset({ protocolId }: { protocolId: ProtocolId }) {
       // Replaced mid-run by a shortcut: recorded as stopped, the same as Close.
       const { status } = engine.getState();
       if (status === 'running' || status === 'paused') {
-        void storage.addHistoryEntry({ at: new Date().toISOString(), protocolId, completed: false });
+        void storage.addHistoryEntry({ at: new Date().toISOString(), protocolId, ...live.current.historyName, completed: false });
       }
       engine.dispose();
       engineRef.current = null;
@@ -156,6 +163,7 @@ export function Reset({ protocolId }: { protocolId: ProtocolId }) {
       void storage.addHistoryEntry({
         at: new Date().toISOString(),
         protocolId,
+        ...historyName,
         completed: false,
       });
     }

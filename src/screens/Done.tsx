@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigation } from '../app/navigation';
+import { useNavigation, type ResetId } from '../app/navigation';
 import { callLabel, planOnDone } from '../app/plan';
 import { getCachedPlan } from '../app/planStore';
 import { BottomBar } from '../components/BottomBar';
@@ -9,12 +9,11 @@ import { InstallHint } from '../components/InstallHint';
 import { cx, focusRing } from '../components/cx';
 import { Screen } from '../components/Screen';
 import { HELPED_OPTIONS } from '../content/format';
-import type { ProtocolId } from '../content/protocols';
 import * as haptics from '../platform/haptics';
 import { storage, type Helped, type PanicPlan } from '../platform/storage';
 
 interface DoneProps {
-  protocolId: ProtocolId;
+  protocolId: ResetId;
   /** Timestamp of the history entry Reset saved for this run. */
   completedAt: string;
 }

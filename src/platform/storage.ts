@@ -44,6 +44,8 @@ export interface HistoryEntry {
   /** ISO timestamp. */
   at: string;
   protocolId: string;
+  /** The custom reset's name when it ran, so history keeps it even after it's changed or deleted. */
+  protocolName?: string;
   completed: boolean;
   helped?: Helped;
 }
@@ -55,15 +57,30 @@ export interface PanicPlan {
   medsNote?: string;
 }
 
+export type CustomStep = 'breathing' | 'grounding' | 'lines';
+
+/** The person's one custom reset (see content/customReset.ts). */
+export interface CustomReset {
+  name: string;
+  /** In playing order. Each at most once; breathing is required. */
+  steps: CustomStep[];
+  patternId: string;
+  breathSec: 30 | 60 | 90;
+  linesLength: 'short' | 'standard';
+}
+
+export const CUSTOM_NAME_MAX = 24;
+
 export interface LocalData {
   settings: Settings;
   history: HistoryEntry[];
   panicPlan?: PanicPlan;
+  customReset?: CustomReset;
 }
 
 export type StorageKey = keyof LocalData;
 
-const STORAGE_KEYS = ['settings', 'history', 'panicPlan'] as const satisfies readonly StorageKey[];
+const STORAGE_KEYS = ['settings', 'history', 'panicPlan', 'customReset'] as const satisfies readonly StorageKey[];
 /**
  * Keys older versions wrote that nothing reads any more. Left as they are on the
  * device (no startup migration touches stored data); only clearAll() removes them.
@@ -120,9 +137,15 @@ export function normalizeHistory(raw: unknown): HistoryEntry[] {
   const entries: HistoryEntry[] = [];
   for (const item of raw) {
     if (!isRecord(item)) continue;
-    const { at, protocolId, completed, helped } = item;
+    const { at, protocolId, protocolName, completed, helped } = item;
     if (typeof at !== 'string' || typeof protocolId !== 'string' || typeof completed !== 'boolean') continue;
-    entries.push(isHelped(helped) ? { at, protocolId, completed, helped } : { at, protocolId, completed });
+    entries.push({
+      at,
+      protocolId,
+      ...(typeof protocolName === 'string' && protocolName ? { protocolName: protocolName.slice(0, CUSTOM_NAME_MAX) } : {}),
+      completed,
+      ...(isHelped(helped) ? { helped } : {}),
+    });
   }
   return entries;
 }
@@ -135,6 +158,22 @@ export function normalizePanicPlan(raw: unknown): PanicPlan | undefined {
     if (typeof value === 'string') plan[field] = value;
   }
   return plan;
+}
+
+const CUSTOM_STEPS: readonly CustomStep[] = ['breathing', 'grounding', 'lines'];
+const isCustomStep = (v: unknown): v is CustomStep => CUSTOM_STEPS.some((s) => s === v);
+
+/** A usable custom reset, or undefined if the stored value isn't one. */
+export function normalizeCustomReset(raw: unknown): CustomReset | undefined {
+  if (!isRecord(raw)) return undefined;
+  const { name, steps, patternId, breathSec, linesLength } = raw;
+  if (!Array.isArray(steps) || !steps.every(isCustomStep)) return undefined;
+  if (new Set(steps).size !== steps.length || !steps.includes('breathing')) return undefined;
+  if (typeof patternId !== 'string' || !/^[a-z0-9-]{1,40}$/.test(patternId)) return undefined;
+  if (breathSec !== 30 && breathSec !== 60 && breathSec !== 90) return undefined;
+  if (linesLength !== 'short' && linesLength !== 'standard') return undefined;
+  const clean = typeof name === 'string' ? name.trim().slice(0, CUSTOM_NAME_MAX) : '';
+  return { name: clean || 'My reset', steps: [...steps], patternId, breathSec, linesLength };
 }
 
 // ─── Backends ────────────────────────────────────────────────────────────────
@@ -199,6 +238,9 @@ export interface AppStorage {
 
   getPanicPlan(): Promise<PanicPlan | undefined>;
   savePanicPlan(plan: PanicPlan): Promise<boolean>;
+
+  getCustomReset(): Promise<CustomReset | undefined>;
+  saveCustomReset(custom: CustomReset): Promise<boolean>;
 }
 
 export function createStorage(backend: StorageBackend): AppStorage {
@@ -283,6 +325,9 @@ export function createStorage(backend: StorageBackend): AppStorage {
 
     getPanicPlan: async () => normalizePanicPlan(await getJSON('panicPlan')),
     savePanicPlan: (plan) => setJSON('panicPlan', plan),
+
+    getCustomReset: async () => normalizeCustomReset(await getJSON('customReset')),
+    saveCustomReset: (custom) => setJSON('customReset', custom),
   };
 }
 

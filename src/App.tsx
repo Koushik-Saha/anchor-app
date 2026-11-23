@@ -3,6 +3,7 @@ import { createStartLinkFilter, freshRunRoute, routeFromUrl } from './app/launch
 import { NavigationContext, type Navigation, type Route } from './app/navigation';
 import * as audio from './platform/audio';
 import * as deepLinks from './platform/deepLinks';
+import { Builder } from './screens/Builder';
 import { Done } from './screens/Done';
 import { History } from './screens/History';
 import { Home } from './screens/Home';
@@ -29,6 +30,8 @@ function renderRoute(route: Route): ReactElement {
       return <Plan />;
     case 'history':
       return <History />;
+    case 'builder':
+      return <Builder />;
     case 'what-helped':
       return <WhatHelped />;
     case 'settings':

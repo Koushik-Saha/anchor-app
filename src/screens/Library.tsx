@@ -1,9 +1,11 @@
+import { getCachedCustomReset } from '../app/customResetStore';
 import { useNavigation } from '../app/navigation';
 import { BottomBar } from '../components/BottomBar';
 import { CalmButton } from '../components/CalmButton';
 import { cx, focusRing } from '../components/cx';
 import { Screen } from '../components/Screen';
 import { ScreenTitle } from '../components/ScreenTitle';
+import { CUSTOM_RESET_ID, customProtocol } from '../content/customReset';
 import { formatDuration } from '../content/format';
 import { protocols } from '../content/protocols';
 import type { Protocol } from '../engine';
@@ -22,7 +24,7 @@ function ProtocolCard({ protocol, onSelect }: { protocol: Protocol; onSelect: ()
       )}
     >
       <span className="flex w-full flex-wrap items-baseline justify-between gap-x-3">
-        <span className="text-lg font-medium text-ink">{protocol.name}</span>
+        <span className="text-lg font-medium text-ink [overflow-wrap:anywhere]">{protocol.name}</span>
         <span className="shrink-0 text-sm text-muted">{formatDuration(protocol.approxSeconds)}</span>
       </span>
       <span className="text-sm text-muted">{protocol.description}</span>
@@ -44,6 +46,12 @@ export function Library() {
     navigate({ view: 'reset', protocolId: protocol.id });
   };
 
+  const custom = getCachedCustomReset();
+  const startCustom = () => {
+    audio.prime();
+    navigate({ view: 'reset', protocolId: CUSTOM_RESET_ID });
+  };
+
   return (
     <Screen
       bottom={
@@ -60,7 +68,16 @@ export function Library() {
             <ProtocolCard protocol={p} onSelect={() => start(p)} />
           </li>
         ))}
+        {custom && (
+          <li>
+            <ProtocolCard protocol={customProtocol(custom)} onSelect={startCustom} />
+          </li>
+        )}
       </ul>
+
+      <CalmButton variant="quiet" className="mt-4 self-center" onClick={() => navigate('builder')}>
+        {custom ? 'Change my reset' : 'Build my reset'}
+      </CalmButton>
     </Screen>
   );
 }

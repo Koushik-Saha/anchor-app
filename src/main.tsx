@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import { App } from './App';
+import { loadCustomReset } from './app/customResetStore';
 import { consumeLaunchRoute, routeFromUrl } from './app/launch';
 import { loadPlan } from './app/planStore';
 import type { Route } from './app/navigation';
@@ -35,8 +36,8 @@ async function boot(): Promise<Route> {
 
 void boot().then(async (initialRoute) => {
   install.init(); // beforeinstallprompt can fire before React mounts
-  // Settings and My plan come from on-device storage before the first paint (read-only: nothing is migrated).
-  const [initialSettings] = await Promise.all([storage.getSettings(), loadPlan()]);
+  // Settings, My plan and the custom reset come from on-device storage before the first paint (read-only: nothing is migrated).
+  const [initialSettings] = await Promise.all([storage.getSettings(), loadPlan(), loadCustomReset()]);
   createRoot(root).render(
     <StrictMode>
       <SettingsProvider initial={initialSettings}>

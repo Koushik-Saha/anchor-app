@@ -5,6 +5,7 @@ import { getCachedPlan, savePlan } from '../app/planStore';
 import { BottomBar } from '../components/BottomBar';
 import { CalmButton } from '../components/CalmButton';
 import { cx, focusRing } from '../components/cx';
+import { PRIVATE_FIELD } from '../components/privateField';
 import { Screen } from '../components/Screen';
 import { ScreenTitle } from '../components/ScreenTitle';
 import type { PanicPlan } from '../platform/storage';
@@ -15,20 +16,6 @@ const SAVE_DELAY_MS = 500;
 
 /** Saves the cleaned plan; an all-empty plan is removed rather than stored as blanks. */
 const persist = (values: Fields): Promise<void> => savePlan(values);
-
-/**
- * "This never leaves your device" also means: no cloud spellcheck and no grammar
- * extensions reading these fields (they can upload what's typed). OS keyboards stay on-device.
- */
-const PRIVATE_FIELD = {
-  spellCheck: false,
-  autoCorrect: 'off',
-  autoCapitalize: 'sentences',
-  'data-gramm': 'false',
-  'data-gramm_editor': 'false',
-  'data-enable-grammarly': 'false',
-  'data-lt-active': 'false',
-} as const;
 
 const inputClass = cx(
   'w-full rounded-2xl bg-surface px-4 py-3 text-lg text-ink placeholder:text-muted/70',
