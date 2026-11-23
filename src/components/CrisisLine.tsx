@@ -1,3 +1,6 @@
+import { useSettings } from '../app/settings';
+import { resolveCrisisLine } from '../content/crisisLines';
+import { deviceLocales } from '../platform/locale';
 import { cx, focusRing } from './cx';
 
 const link = cx(
@@ -5,19 +8,23 @@ const link = cx(
   focusRing,
 );
 
-/** Discreet 988 line (Home + Done). Visible, never blocking. tel:/sms: open the phone's own apps. */
+/** Discreet crisis line (Home + Done). Visible, never blocking. tel:/sms: open the phone's own apps. */
 export function CrisisLine() {
+  const { settings } = useSettings();
+  const line = resolveCrisisLine(settings.crisisRegion, deviceLocales());
   return (
     <p className="text-center text-sm text-muted">
       In crisis?{' '}
-      <a href="tel:988" aria-label="Call 988" className={link}>
-        Call
-      </a>{' '}
-      or{' '}
-      <a href="sms:988" aria-label="Text 988" className={link}>
-        text
-      </a>{' '}
-      988 (US)
+      {line.segments.map((segment) =>
+        segment.href ? (
+          <a key={segment.href} href={segment.href} aria-label={segment.ariaLabel} className={link}>
+            {segment.text}
+          </a>
+        ) : (
+          <span key={segment.text}>{segment.text}</span>
+        ),
+      )}
+      {line.extra && <span className="block">{line.extra}</span>}
     </p>
   );
 }

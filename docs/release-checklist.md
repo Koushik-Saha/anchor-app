@@ -116,7 +116,7 @@ Not caught by the scan (tone and implied effects), from a manual read of every r
 These lines are product copy, so I've **flagged them, not changed them**. If you reword them, keep each at 8 words or fewer; `protocols.test.ts` checks this.
 
 Other review risks:
-- **988 is US-only.** The app says "988 (US)". If you release outside the US, either start with the US storefront only or add non-US guidance in the app. privacy.html already says "elsewhere, contact your local emergency number".
+- **Crisis lines:** bundled for the US, Canada, UK, Ireland and Australia, picked from the device locale with a Settings override. Everywhere else shows the US line plus "or your local emergency number", and **988 won't connect outside the US and Canada**. Re-check every number and service name before each release.
 - **Apple 3.1.1 (payments):** doesn't apply. Anchor is free on every platform, with no in-app purchases and no external purchase links. ✅
 - **Apple 4.2 (minimum functionality):** single-purpose, but it has the reset flow, library, history, settings and My plan. Mention haptics and offline use in the review notes. ✅
 - **Apple 5.1.1 / Play User Data:** no data collected, a privacy policy URL is set, and the privacy manifest declares nothing collected. ✅

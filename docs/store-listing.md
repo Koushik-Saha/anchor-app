@@ -50,13 +50,13 @@ PRIVATE BY DESIGN
 GENTLE ON PURPOSE
 • Large text and reduced-motion options; works with VoiceOver and TalkBack.
 • Dark, dim and quiet — designed for 2 a.m.
-• "In crisis? Call or text 988" is always one tap away (US).
+• A crisis line for your country is one tap away on Home and Done (US, Canada, UK, Ireland, Australia).
 
 FREE
 Everything in Anchor is free: the classic 90-second reset, breathing-only and grounding-only resets, box breathing, an extended 3-minute reset, a night reset (extra dim, silent), and My plan: your own note, shown after every reset, and a one-tap call to your person.
 No subscription. No in-app purchase. Nothing locked.
 
-Anchor is a self-help tool, not a medical device, and not a substitute for professional care. If you are in crisis in the US, call or text 988. Elsewhere, contact your local emergency number.
+Anchor is a self-help tool, not a medical device, and not a substitute for professional care. If you are in crisis: in the US or Canada, call or text 988; in the UK or Ireland, call Samaritans free on 116 123; in Australia, call Lifeline on 13 11 14. Elsewhere, contact your local emergency number.
 ```
 
 ### Feature bullets (for the website, press kit, or Play "What's new")
@@ -96,7 +96,7 @@ Anchor is a self-help tool, not a medical device, and not a substitute for profe
 No account or login, and no in-app purchases: every feature is free and works immediately
 and offline (try airplane mode). Library has all six resets; My plan is on the Home screen.
 Anchor is a self-help / wellness tool. It makes no medical, diagnostic or treatment claims, collects no data,
-and shows the US 988 crisis line on the Home and Done screens. Deep link for testing: anchor://start
+and shows a crisis line chosen from the device locale (override in Settings) on the Home and Done screens. Deep link for testing: anchor://start
 ```
 
 ---

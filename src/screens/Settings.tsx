@@ -9,8 +9,10 @@ import { cx } from '../components/cx';
 import { Screen } from '../components/Screen';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { Toggle } from '../components/Toggle';
+import { CRISIS_CHOICES, crisisLineText, resolveCrisisLine } from '../content/crisisLines';
 import * as audio from '../platform/audio';
 import * as haptics from '../platform/haptics';
+import { deviceLocales } from '../platform/locale';
 
 const PITCHES = [
   { value: 'low', label: 'Low' },
@@ -34,6 +36,7 @@ export function Settings() {
   const { navigate } = useNavigation();
   const { settings, updateSettings } = useSettings();
   const osReducedMotion = usePrefersReducedMotion();
+  const crisisLine = resolveCrisisLine(settings.crisisRegion, deviceLocales());
 
   return (
     <Screen
@@ -102,6 +105,25 @@ export function Settings() {
           />
         </Group>
 
+        <Group title="Crisis line">
+          <div role="group" aria-label="Crisis line" className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,9rem),1fr))] gap-2">
+            {CRISIS_CHOICES.map(({ value, label }) => (
+              <CalmButton
+                key={value}
+                aria-pressed={settings.crisisRegion === value}
+                className={cx('ring-2', settings.crisisRegion === value ? 'text-ink ring-accent' : 'ring-transparent')}
+                onClick={() => updateSettings({ crisisRegion: value })}
+              >
+                {label}
+              </CalmButton>
+            ))}
+          </div>
+          <p className="text-sm text-muted">
+            {crisisLineText(crisisLine)}
+            {crisisLine.extra && `, ${crisisLine.extra}`}
+          </p>
+        </Group>
+
         <Group title="Your data">
           <CalmButton className="justify-between" onClick={() => navigate('history')}>
             History
@@ -112,8 +134,9 @@ export function Settings() {
         </Group>
 
         <aside aria-label="About Anchor" className="rounded-2xl border border-surface p-5 text-sm leading-relaxed text-muted">
-          Anchor is a self-help tool, not a medical device, and not a substitute for professional care. In crisis,
-          call or text 988 (US).
+          Anchor is a self-help tool, not a medical device, and not a substitute for professional care. In crisis:{' '}
+          {crisisLineText(crisisLine)}
+          {crisisLine.extra && `, ${crisisLine.extra}`}.
         </aside>
 
         {/* Adapter test panel: development builds only (stripped from production). */}

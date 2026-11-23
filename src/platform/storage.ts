@@ -15,6 +15,11 @@ import type { TonePitch } from './audio';
 
 // ─── LocalData shape (spec §2.5) ─────────────────────────────────────────────
 
+/** Which crisis line to show. */
+export type CrisisRegion = 'us' | 'ca' | 'uk-ie' | 'au' | 'other';
+/** 'auto' follows the device locale; anything else is the person's own choice. */
+export type CrisisChoice = 'auto' | CrisisRegion;
+
 export interface Settings {
   haptics: boolean;
   sound: boolean;
@@ -29,6 +34,8 @@ export interface Settings {
    * Kept as a plain string here; content resolves unknown ids to the default pattern.
    */
   breathPattern: string;
+  /** Crisis line shown on Home and Done. */
+  crisisRegion: CrisisChoice;
 }
 
 export type Helped = 'breathing' | 'grounding' | 'both' | 'not-sure';
@@ -76,6 +83,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = {
   tonePitch: 'low',
   installHintDismissed: false,
   breathPattern: '4-2-6',
+  crisisRegion: 'auto',
 };
 
 // ─── Validation: stored data may be old, partial or corrupt ──────────────────
@@ -85,6 +93,8 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 
 const HELPED: readonly Helped[] = ['breathing', 'grounding', 'both', 'not-sure'];
 const isHelped = (v: unknown): v is Helped => HELPED.some((h) => h === v);
+const CRISIS_CHOICES: readonly CrisisChoice[] = ['auto', 'us', 'ca', 'uk-ie', 'au', 'other'];
+const isCrisisChoice = (v: unknown): v is CrisisChoice => CRISIS_CHOICES.some((c) => c === v);
 
 export function normalizeSettings(raw: unknown): Settings {
   const r = isRecord(raw) ? raw : {};
@@ -100,6 +110,7 @@ export function normalizeSettings(raw: unknown): Settings {
       typeof r.breathPattern === 'string' && /^[a-z0-9-]{1,40}$/.test(r.breathPattern)
         ? r.breathPattern
         : DEFAULT_SETTINGS.breathPattern,
+    crisisRegion: isCrisisChoice(r.crisisRegion) ? r.crisisRegion : DEFAULT_SETTINGS.crisisRegion,
   };
 }
 

@@ -49,7 +49,7 @@ Run on a real iPhone **and** a real Android phone, using a build made with `npm 
 - [ ] **Airplane mode** — airplane mode on (Wi-Fi off too), force-quit Anchor, open it → full reset to Done → answer "What helped?" → History shows it. Force-quit and reopen → settings and history are still there (stored in Capacitor Preferences).
 - [ ] **Leaving mid-reset** — press Home during a reset, come back → "Welcome back." with Resume / Start over.
 - [ ] **Zero permission prompts** — none at install or during use. Android *Settings → Apps → Anchor → Permissions*: nothing to grant. iOS *Settings → Anchor*: no permission switches.
-- [ ] **988 links** — "Call" opens the dialer, "text" opens Messages.
+- [ ] **Crisis lines** — with each Settings choice: "Call" opens the dialer with the right number, "text" opens Messages (988 only). Samaritans and Lifeline are call-only. Set the device region/language to the UK or Australia and check Automatic picks that line.
 
 ## Everything is free
 

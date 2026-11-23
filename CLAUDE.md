@@ -22,7 +22,7 @@ Anchor is a **self-help / wellness tool, not a medical device**. Copy describes 
   - a haptic rhythm that can be followed with eyes closed;
   - optional tones, **OFF by default** (`DEFAULT_SETTINGS.sound = false`);
   - the screen stays awake during a reset (`wakeLock` adapter).
-- **A crisis line is always one tap away:** "Call or text 988" in the US (`CrisisLine`, `tel:988` / `sms:988`). Never remove it, never hide it behind a menu.
+- **A crisis line is always one tap away** (`CrisisLine`). Which line comes from `src/content/crisisLines.ts`: device locale, or the override in Settings (`settings.crisisRegion`). Bundled, never looked up. Never remove it, never hide it behind a menu.
   - *Gap today:* it's on Home and Done only, so from Reset, Library, History, Settings and My plan it takes two taps. Close this gap when you next touch those screens, without breaking the one-line rule in the reset flow.
 
 ## Launch decision: Anchor is FREE
