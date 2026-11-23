@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigation } from '../app/navigation';
 import { useSettings } from '../app/settings';
 import { useReducedMotion } from '../app/useReducedMotion';
@@ -7,6 +7,7 @@ import { createCircleAnimator } from '../components/breathCircle';
 import { CalmButton } from '../components/CalmButton';
 import { cx, focusRing } from '../components/cx';
 import { ProgressDots } from '../components/ProgressDots';
+import { protocolWithChosenPattern } from '../content/breathPatterns';
 import { cueText } from '../content/cueText';
 import { defaultProtocol, getProtocol, type ProtocolId } from '../content/protocols';
 import { createResetEngine, cueAt, type BreathPart, type ResetEngine } from '../engine';
@@ -21,7 +22,13 @@ export function Reset({ protocolId }: { protocolId: ProtocolId }) {
   const { navigate } = useNavigation();
   const { settings } = useSettings();
   const reducedMotion = useReducedMotion();
-  const protocol = getProtocol(protocolId) ?? defaultProtocol;
+  // Protocols with `choosePattern` breathe the person's last-picked pattern; others run as written.
+  // Memoised on the ids so the engine isn't recreated on unrelated settings changes.
+  const patternId = settings.breathPattern;
+  const protocol = useMemo(
+    () => protocolWithChosenPattern(getProtocol(protocolId) ?? defaultProtocol, patternId),
+    [protocolId, patternId],
+  );
 
   const circleRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<ResetEngine | null>(null);

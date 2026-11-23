@@ -7,6 +7,11 @@ export interface BreathingPhase {
   kind: 'breathing';
   cycles: number;
   inhaleSec: number;
+  /**
+   * A short second inhale on top of the first ("double inhale"); omitted/0 for none.
+   * The circle grows most of the way on the inhale and the last bit on the top-up.
+   */
+  topUpSec?: number;
   /** Hold after inhaling; 0 for no hold. */
   holdSec: number;
   exhaleSec: number;
@@ -52,4 +57,6 @@ export interface Protocol {
   noTones?: boolean;
   /** Render the reset flow extra-dim (night use). */
   extraDim?: boolean;
+  /** The person picks the breathing pattern before starting (Library opens the pattern picker). */
+  choosePattern?: boolean;
 }

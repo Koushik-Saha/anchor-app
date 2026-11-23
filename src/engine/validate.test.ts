@@ -36,9 +36,10 @@ describe('validateProtocol', () => {
   it('rejects invalid breathing timings', () => {
     const errors = validateProtocol({
       ...valid,
-      phases: [{ kind: 'breathing', cycles: 0, inhaleSec: 0, holdSec: -1, exhaleSec: Number.NaN, holdOutSec: -2 }],
+      phases: [{ kind: 'breathing', cycles: 0, inhaleSec: 0, topUpSec: -1, holdSec: -1, exhaleSec: Number.NaN, holdOutSec: -2 }],
     });
-    expect(errors).toHaveLength(5);
+    expect(errors).toHaveLength(6);
+    expect(errors.some((e) => e.includes('topUpSec'))).toBe(true);
   });
 
   it('rejects empty grounding, bad steps and non-positive secPerStep', () => {

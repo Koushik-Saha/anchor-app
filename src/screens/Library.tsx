@@ -33,8 +33,13 @@ function ProtocolCard({ protocol, onSelect }: { protocol: Protocol; onSelect: ()
 export function Library() {
   const { navigate } = useNavigation();
 
-  // Every protocol starts straight away: one tap, no gate.
+  // One tap, no gate: a protocol starts straight away, or (if it lets you choose
+  // a breathing pattern) opens the pattern picker, where one more tap starts it.
   const start = (protocol: LibraryProtocol) => {
+    if ('choosePattern' in protocol && protocol.choosePattern) {
+      navigate({ view: 'pattern', protocolId: protocol.id });
+      return;
+    }
     audio.prime(); // this tap enables sound for the reset's timed tones (iOS)
     navigate({ view: 'reset', protocolId: protocol.id });
   };

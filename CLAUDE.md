@@ -104,6 +104,8 @@ CI (`.github/workflows/ci.yml`) runs typecheck → lint → test → build → s
   - Interruption contract: the UI calls `engine.interrupt()` on `visibilitychange` → hidden (primary); a frame gap > 5s (device slept) also pauses with `wasInterrupted = true` (fallback — keep it generous, visible-page stalls of 1–2s are normal), and offer Resume / Restart when `wasInterrupted`.
   - Tests use a fake clock + fake frame scheduler (see `resetEngine.test.ts`) — never real timers.
 - `src/content` — protocol definitions as typed data. New protocol = new data, never new engine code. `protocols.test.ts` validates everything shipped.
+  - Breathing patterns are data too (`breathPatterns.ts`: 4-2-6, box, 4-7-8, double inhale). A pattern is only timing for a `BreathingPhase` (`topUpSec` = the double inhale's short second inhale), so circle, haptics, tones, reduced motion and keep-awake need no per-pattern code.
+  - A protocol with `choosePattern: true` (only `breathing-60`) opens `PatternPicker` from Library and breathes the person's last pick, saved as `settings.breathPattern`; `protocolWithChosenPattern()` applies it in Reset. Every other protocol, including the classic reset, always breathes as written (4-2-6). Unknown stored ids fall back to 4-2-6.
 - `src/platform` — the only place that touches device APIs: `storage.ts`, `haptics.ts`, `audio.ts`, `wakeLock.ts`. Each must work on web and no-op safely where unsupported, and never throw. Pattern for every adapter:
   - an `XAdapter` interface + `createWebX()` web implementation (takes its browser API as an optional param so tests can pass fakes),
   - a module-level API that call sites use, delegating to the active adapter,
@@ -112,7 +114,7 @@ CI (`.github/workflows/ci.yml`) runs typecheck → lint → test → build → s
   - Haptics/audio gate themselves on `settings.haptics` / `settings.sound` (synced by `SettingsProvider`). Audio needs `audio.prime()` from a tap handler (e.g. Start reset) before timer-driven tones will play on iOS.
   - Stored data is untrusted (old/corrupt): read through the typed helpers, which normalise it.
 - `src/app` — app-wide state: `navigation.ts` (`View` type + `useNavigation()`), `settings.ts` (`useSettings()`, defaults, normalisation), `SettingsProvider.tsx`. Settings are loaded before first render in `main.tsx`.
-- `src/screens` — Home, Reset, Done, Library, Plan, History, Settings. Navigation is a view-state switch in `App.tsx` (no router) — call `useNavigation().navigate('library')`.
+- `src/screens` — Home, Reset, Done, Library, PatternPicker, Plan, History, Settings. Navigation is a view-state switch in `App.tsx` (no router) — call `useNavigation().navigate('library')`.
 - `src/components` — shared UI. Use these instead of one-off styles:
   - `Screen` — page layout (480px column, safe areas); `bottom` prop for a `BottomBar`.
   - `BigButton` — primary action, accent, min 96px. One per screen at most.

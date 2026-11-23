@@ -36,4 +36,31 @@ describe('createCircleAnimator', () => {
     expect(opacity[2]).toBe(1);
     expect(opacity[4]).toBeCloseTo(0.3);
   });
+
+  it('double inhale: the circle grows, grows a little more, then slowly shrinks', () => {
+    const dbl: BreathingPhase = { kind: 'breathing', cycles: 1, inhaleSec: 3, topUpSec: 1, holdSec: 0, exhaleSec: 6 };
+    const frame = createCircleAnimator();
+    const at = (t: number, reduced = false) => frame(cueAt(dbl, t), t, t, reduced);
+    const start = at(0).scale;
+    const afterInhale = at(3_000).scale;
+    const afterTopUp = at(4_000).scale;
+    const midExhale = at(7_000).scale;
+    const end = at(10_000).scale;
+    expect(start).toBeCloseTo(BREATH_MIN_SCALE);
+    const range = BREATH_MAX_SCALE - BREATH_MIN_SCALE;
+    expect(afterInhale - start).toBeGreaterThan(0.7 * range); // the big grow
+    expect(afterTopUp).toBe(BREATH_MAX_SCALE);
+    expect(afterTopUp - afterInhale).toBeGreaterThan(0.1 * range); // a visible extra grow…
+    expect(afterTopUp - afterInhale).toBeLessThan(afterInhale - start); // …that is the smaller one
+    expect(midExhale).toBeLessThan(afterTopUp);
+    expect(end).toBeCloseTo(BREATH_MIN_SCALE);
+
+    // Reduced motion shows the same two stages as opacity, never scale.
+    const still = createCircleAnimator();
+    const o = [0, 3_000, 4_000].map((t) => still(cueAt(dbl, t), t, t, true));
+    expect(new Set(o.map((f) => f.scale)).size).toBe(1);
+    const opacities = o.map((f) => f.opacity);
+    expect(opacities).toEqual([...opacities].sort((x, y) => x - y)); // rising through both inhales
+    expect(new Set(opacities).size).toBe(3); // three distinct steps
+  });
 });

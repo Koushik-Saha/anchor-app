@@ -1,4 +1,5 @@
 import type { BreathingPhase, GroundingPhase, GroundingStep, LinesPhase, Protocol } from '../engine';
+import { getBreathPattern, type BreathTiming } from './breathPatterns';
 
 /**
  * All bundled protocols. Content is data: adding a protocol means adding an
@@ -12,10 +13,10 @@ import type { BreathingPhase, GroundingPhase, GroundingStep, LinesPhase, Protoco
 
 // ─── Shared building blocks ──────────────────────────────────────────────────
 
-/** Default pattern: long exhale is what down-regulates. 12s per cycle. */
-const BREATH_4_2_6 = { inhaleSec: 4, holdSec: 2, exhaleSec: 6 } as const;
+/** Default pattern (see breathPatterns.ts): in 4, hold 2, out 6. 12s per cycle. */
+const BREATH_4_2_6 = getBreathPattern('4-2-6').timing;
 
-const breathing = (cycles: number, pattern: Omit<BreathingPhase, 'kind' | 'cycles'> = BREATH_4_2_6): BreathingPhase => ({
+const breathing = (cycles: number, pattern: BreathTiming = BREATH_4_2_6): BreathingPhase => ({
   kind: 'breathing',
   cycles,
   ...pattern,
@@ -55,6 +56,8 @@ export const breathing60 = {
   description: 'One minute of slow breathing with the circle.',
   approxSeconds: 60,
   phases: [breathing(5)],
+  // Library opens the pattern picker first; the step stays ~60s whichever pattern is picked.
+  choosePattern: true,
 } as const satisfies Protocol;
 
 /** 5×6s grounding (30s) + 2×5s lines (10s) = 40s. */
@@ -74,7 +77,7 @@ export const boxBreathing = {
   name: 'Box breathing',
   description: 'In, hold, out, hold: four even counts.',
   approxSeconds: 65,
-  phases: [breathing(4, { inhaleSec: 4, holdSec: 4, exhaleSec: 4, holdOutSec: 4 })],
+  phases: [breathing(4, getBreathPattern('box').timing)],
 } as const satisfies Protocol;
 
 /** 6×12s breathing (72s) + 5×12s grounding (60s) + 6×8s lines (48s) = 180s. */

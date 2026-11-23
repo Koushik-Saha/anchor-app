@@ -11,6 +11,7 @@ function validatePhase(phase: Phase, at: string): string[] {
     case 'breathing':
       if (!Number.isInteger(phase.cycles) || phase.cycles < 1) errors.push(`${at}: cycles must be an integer ≥ 1`);
       if (!isPositive(phase.inhaleSec)) errors.push(`${at}: inhaleSec must be > 0`);
+      if (phase.topUpSec !== undefined && !isNonNegative(phase.topUpSec)) errors.push(`${at}: topUpSec must be ≥ 0`);
       if (!isNonNegative(phase.holdSec)) errors.push(`${at}: holdSec must be ≥ 0`);
       if (!isPositive(phase.exhaleSec)) errors.push(`${at}: exhaleSec must be > 0`);
       if (phase.holdOutSec !== undefined && !isNonNegative(phase.holdOutSec)) {

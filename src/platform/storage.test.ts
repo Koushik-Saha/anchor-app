@@ -201,8 +201,34 @@ describe('normalizeSettings', () => {
   });
 
   it('keeps a full valid settings object as-is', () => {
-    const stored = { haptics: false, sound: true, largeText: true, reducedMotion: true, tonePitch: 'mid', installHintDismissed: true };
+    const stored = {
+      haptics: false,
+      sound: true,
+      largeText: true,
+      reducedMotion: true,
+      tonePitch: 'mid',
+      installHintDismissed: true,
+      breathPattern: '4-7-8',
+    };
     expect(normalizeSettings(stored)).toEqual(stored);
+  });
+
+  it('breathPattern: remembered as a short id; missing, odd or oversized values fall back to 4-2-6', () => {
+    expect(normalizeSettings({ breathPattern: 'double-inhale' }).breathPattern).toBe('double-inhale');
+    for (const bad of [undefined, 42, '', 'Not An Id', 'x'.repeat(41), '<script>']) {
+      expect(normalizeSettings({ breathPattern: bad }).breathPattern).toBe('4-2-6');
+    }
+  });
+
+  it('the last-used pattern survives a save and a fresh read (on-device only)', async () => {
+    const backend = createMemoryBackend();
+    await createStorage(backend).saveSettings({ ...DEFAULT_SETTINGS, breathPattern: 'box' });
+    expect((await createStorage(backend).getSettings()).breathPattern).toBe('box');
+  });
+
+  it('settings saved before breathPattern existed keep every other value', () => {
+    const old = { haptics: false, sound: true, largeText: true, reducedMotion: true, tonePitch: 'mid', installHintDismissed: true };
+    expect(normalizeSettings(old)).toEqual({ ...old, breathPattern: '4-2-6' });
   });
 
   it('settings saved before reducedMotion existed get it defaulted to false', () => {

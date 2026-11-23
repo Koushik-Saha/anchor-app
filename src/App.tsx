@@ -6,6 +6,7 @@ import { Done } from './screens/Done';
 import { History } from './screens/History';
 import { Home } from './screens/Home';
 import { Library } from './screens/Library';
+import { PatternPicker } from './screens/PatternPicker';
 import { Plan } from './screens/Plan';
 import { Reset } from './screens/Reset';
 import { Settings } from './screens/Settings';
@@ -16,6 +17,8 @@ function renderRoute(route: Route): ReactElement {
       return <Home />;
     case 'reset':
       return <Reset protocolId={route.protocolId} />;
+    case 'pattern':
+      return <PatternPicker protocolId={route.protocolId} />;
     case 'done':
       return <Done protocolId={route.protocolId} completedAt={route.completedAt} />;
     case 'library':

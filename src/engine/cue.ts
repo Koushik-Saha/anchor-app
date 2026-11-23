@@ -5,7 +5,7 @@
 import { breathingCycleSec } from './duration';
 import type { BreathingPhase, GroundingPhase, GroundingStep, LinesPhase, Phase } from './types';
 
-export type BreathPart = 'inhale' | 'hold' | 'exhale' | 'holdOut';
+export type BreathPart = 'inhale' | 'topUp' | 'hold' | 'exhale' | 'holdOut';
 
 export type Cue =
   | {
@@ -16,13 +16,19 @@ export type Cue =
       part: BreathPart;
       /** 0..1 within the current part. */
       partProgress: number;
-      /** Lung fullness 0..1: eased up on inhale, 1 on hold, eased down on exhale, 0 on hold-out. */
+      /**
+       * Lung fullness 0..1: eased up on inhale, 1 on hold, eased down on exhale, 0 on hold-out.
+       * With a top-up, the inhale eases up to TOP_UP_FROM and the top-up eases the rest of the way.
+       */
       level: number;
     }
   | { kind: 'grounding'; stepIndex: number; step: GroundingStep }
   | { kind: 'lines'; lineIndex: number; line: string };
 
 const clamp01 = (n: number): number => Math.min(Math.max(n, 0), 1);
+
+/** Where the first inhale stops when a top-up follows: the top-up is the last, small grow. */
+export const TOP_UP_FROM = 0.8;
 
 /** Sine ease-in-out: slow at the turns, like a natural breath. */
 export const easeInOut = (p: number): number => (1 - Math.cos(Math.PI * clamp01(p))) / 2;
@@ -36,11 +42,28 @@ function breathingCue(phase: BreathingPhase, elapsedMs: number): Cue {
   const parts = (
     [
       ['inhale', phase.inhaleSec],
+      ['topUp', phase.topUpSec ?? 0],
       ['hold', phase.holdSec],
       ['exhale', phase.exhaleSec],
       ['holdOut', phase.holdOutSec ?? 0],
     ] as const
   ).filter(([, sec]) => sec > 0);
+
+  const inhaleTop = (phase.topUpSec ?? 0) > 0 ? TOP_UP_FROM : 1;
+  const levelOf = (part: BreathPart, p: number): number => {
+    switch (part) {
+      case 'inhale':
+        return inhaleTop * easeInOut(p);
+      case 'topUp':
+        return TOP_UP_FROM + (1 - TOP_UP_FROM) * easeInOut(p);
+      case 'hold':
+        return 1;
+      case 'exhale':
+        return 1 - easeInOut(p);
+      case 'holdOut':
+        return 0;
+    }
+  };
 
   for (let i = 0; i < parts.length; i++) {
     const [part, sec] = parts[i] ?? ['inhale', 1];
@@ -48,8 +71,7 @@ function breathingCue(phase: BreathingPhase, elapsedMs: number): Cue {
     const isLast = i === parts.length - 1;
     if (within < partMs || isLast) {
       const partProgress = clamp01(within / partMs);
-      const level =
-        part === 'inhale' ? easeInOut(partProgress) : part === 'hold' ? 1 : part === 'exhale' ? 1 - easeInOut(partProgress) : 0;
+      const level = levelOf(part, partProgress);
       return { kind: 'breathing', cycle, cycles: phase.cycles, part, partProgress, level };
     }
     within -= partMs;

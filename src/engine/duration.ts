@@ -1,10 +1,10 @@
 import type { BreathingPhase, Phase, Protocol } from './types';
 
-/** Seconds for one full breathing cycle (inhale + hold + exhale + hold-out). */
+/** Seconds for one full breathing cycle (inhale + top-up + hold + exhale + hold-out). */
 export function breathingCycleSec(
-  phase: Pick<BreathingPhase, 'inhaleSec' | 'holdSec' | 'exhaleSec' | 'holdOutSec'>,
+  phase: Pick<BreathingPhase, 'inhaleSec' | 'topUpSec' | 'holdSec' | 'exhaleSec' | 'holdOutSec'>,
 ): number {
-  return phase.inhaleSec + phase.holdSec + phase.exhaleSec + (phase.holdOutSec ?? 0);
+  return phase.inhaleSec + (phase.topUpSec ?? 0) + phase.holdSec + phase.exhaleSec + (phase.holdOutSec ?? 0);
 }
 
 export function phaseDurationSec(phase: Phase): number {

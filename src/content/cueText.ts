@@ -3,6 +3,7 @@ import type { BreathPart, Cue } from '../engine';
 /** On-screen words for each breath part (≤ 8 words — see protocols.test.ts). */
 export const BREATH_LABELS: Readonly<Record<BreathPart, string>> = {
   inhale: 'Breathe in',
+  topUp: 'A little more in',
   hold: 'Hold',
   exhale: 'Breathe out',
   holdOut: 'Hold',

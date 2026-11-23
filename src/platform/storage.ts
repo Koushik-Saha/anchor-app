@@ -24,6 +24,11 @@ export interface Settings {
   tonePitch: TonePitch;
   /** "Add to Home Screen" hint dismissed with "Not now". */
   installHintDismissed: boolean;
+  /**
+   * Last breathing pattern picked for "Just breathing" (an id from content/breathPatterns.ts).
+   * Kept as a plain string here; content resolves unknown ids to the default pattern.
+   */
+  breathPattern: string;
 }
 
 export type Helped = 'breathing' | 'grounding' | 'both' | 'not-sure';
@@ -70,6 +75,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = {
   reducedMotion: false,
   tonePitch: 'low',
   installHintDismissed: false,
+  breathPattern: '4-2-6',
 };
 
 // ─── Validation: stored data may be old, partial or corrupt ──────────────────
@@ -90,6 +96,10 @@ export function normalizeSettings(raw: unknown): Settings {
     reducedMotion: bool(r.reducedMotion, DEFAULT_SETTINGS.reducedMotion),
     tonePitch: r.tonePitch === 'low' || r.tonePitch === 'mid' ? r.tonePitch : DEFAULT_SETTINGS.tonePitch,
     installHintDismissed: bool(r.installHintDismissed, DEFAULT_SETTINGS.installHintDismissed),
+    breathPattern:
+      typeof r.breathPattern === 'string' && /^[a-z0-9-]{1,40}$/.test(r.breathPattern)
+        ? r.breathPattern
+        : DEFAULT_SETTINGS.breathPattern,
   };
 }
 

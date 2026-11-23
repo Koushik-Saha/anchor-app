@@ -10,6 +10,16 @@ describe('breathingCycleSec', () => {
     expect(breathingCycleSec({ inhaleSec: 4, holdSec: 4, exhaleSec: 4, holdOutSec: 4 })).toBe(16);
   });
 
+  it('4-7-8 is a 19s cycle', () => {
+    expect(breathingCycleSec({ inhaleSec: 4, holdSec: 7, exhaleSec: 8 })).toBe(19);
+    expect(phaseDurationSec({ kind: 'breathing', cycles: 3, inhaleSec: 4, holdSec: 7, exhaleSec: 8 })).toBe(57);
+  });
+
+  it('double inhale counts the top-up inhale: 3 + 1 + 6 = 10s', () => {
+    expect(breathingCycleSec({ inhaleSec: 3, topUpSec: 1, holdSec: 0, exhaleSec: 6 })).toBe(10);
+    expect(phaseDurationSec({ kind: 'breathing', cycles: 6, inhaleSec: 3, topUpSec: 1, holdSec: 0, exhaleSec: 6 })).toBe(60);
+  });
+
   it('allows zero-length holds', () => {
     expect(breathingCycleSec({ inhaleSec: 4, holdSec: 0, exhaleSec: 6, holdOutSec: 0 })).toBe(10);
   });

@@ -12,6 +12,8 @@ export type Route =
   | { view: 'history' }
   | { view: 'settings' }
   | { view: 'reset'; protocolId: ProtocolId }
+  /** Choose a breathing pattern, then start `protocolId` (protocols with `choosePattern`). */
+  | { view: 'pattern'; protocolId: ProtocolId }
   /** `completedAt` is the ISO timestamp of the history entry saved for this run. */
   | { view: 'done'; protocolId: ProtocolId; completedAt: string };
 
