@@ -1,7 +1,47 @@
 # Anchor — CLAUDE.md
 
-Anchor is a single-purpose, offline-first app for the worst 90 seconds of a panic attack.
-One codebase → web (PWA) + Android + iOS (via Capacitor, not yet initialised).
+## Product
+
+Anchor is a panic-reset app. **One tap starts a 90-second guided reset**: paced breathing, then a 5-4-3-2-1 grounding exercise, then a few calm closing lines (`classic-90` in `src/content/protocols.ts`: 48 s + 30 s + 15 s).
+One codebase → web (PWA) + Android + iOS (Capacitor).
+
+Anchor is a **self-help / wellness tool, not a medical device**. Copy describes what the app *does* ("breathe with the circle", "name five things you can see"), never what it *cures, treats, prevents or reduces*. No efficacy or outcome claims anywhere: app, store listing, privacy page, release notes.
+**Run `npm run copy-scan` after any copy change**: it must report 0 HIGH. Read every REVIEW line yourself.
+
+## Non-negotiable design rules
+
+- **Fully offline.** No network calls in the reset flow, ever, and none anywhere else either (no CDN, fonts or remote config). The web CSP (`connect-src 'self'`) and the Android manifest (no INTERNET) enforce this; keep it that way.
+- **No account, no analytics, no ads, no tracking.** Settings, history and My plan notes are stored on-device only (through `src/platform/storage.ts`) and never leave the phone.
+- **Every reset-flow screen:**
+  - huge tap targets (≥ 64 px, `min-h-tap`);
+  - **one** short line of text (≤ 8 words; `protocols.test.ts` checks this);
+  - **Skip and Close (✕) always visible**. The user is never trapped in a flow: no popups, upsells, permission prompts or confirmations during a reset.
+- **Accessibility:**
+  - large-text and reduced-motion options in Settings;
+  - VoiceOver and TalkBack support;
+  - a haptic rhythm that can be followed with eyes closed;
+  - optional tones, **OFF by default** (`DEFAULT_SETTINGS.sound = false`);
+  - the screen stays awake during a reset (`wakeLock` adapter).
+- **A crisis line is always one tap away:** "Call or text 988" in the US (`CrisisLine`, `tel:988` / `sms:988`). Never remove it, never hide it behind a menu.
+  - *Gap today:* it's on Home and Done only, so from Reset, Library, History, Settings and My plan it takes two taps. Close this gap when you next touch those screens, without breaking the one-line rule in the reset flow.
+
+## Launch decision: Anchor is FREE
+
+- There is **no paywall, no in-app purchase and no locked feature**. Every protocol and My plan are available to everyone.
+- **Do not add** payment, entitlement-gating, "pro" or unlock code, store-billing plugins or purchase SDKs.
+- *Supersedes* the earlier one-time-unlock plan ($6.99 `full_unlock`). That code is still in the repo and must be removed in its own task; see **Legacy: paid unlock (to be removed)** below. Until then, don't extend it.
+
+## Stack and gates
+
+- **Stack:** Preact (via `preact/compat`) + Vite + Capacitor 8 (iOS / Android), TypeScript strict, Tailwind 4, Vitest.
+- **Before declaring any task done**, run all of these and report the results:
+  ```bash
+  npm run typecheck && npm run lint && npm test && npm run build && npm run size
+  ```
+  Add `npm run copy-scan` when copy changed.
+- **Work in small steps**, with tests in the same change as every feature (engine tests first).
+- **End every task with a summary of the files changed.**
+- Push after every task: commit and push to `origin main` once the gates pass. The repo is **public**, so never commit secrets.
 
 ## Project rules (follow for every task)
 
@@ -102,12 +142,33 @@ CI (`.github/workflows/ci.yml`) runs typecheck → lint → test → build → s
 - Exit/skip must always be visible in the reset flow; no popups, upsells, or permission prompts during a reset.
 - Native apps: Capacitor 8, `capacitor.config.ts`, projects in `ios/` (SPM) and `android/`. After any web change: `npm run build && npx cap sync`. Build/run steps + device checklist: `docs/native.md`.
 - Native adapters (`src/platform/nativeAdapters.ts`: Preferences, Haptics, KeepAwake, App deep links) are loaded only via dynamic import when `isNative()` — never import Capacitor plugins anywhere else, so the web bundle stays plugin-free.
-- Permissions: none at runtime. Android: INTERNET removed in the manifest; only VIBRATE (from @capacitor/haptics). iOS: no `*UsageDescription` keys. Never add a plugin that needs more without asking.
+- Permissions: none at runtime. Android: INTERNET removed in the manifest; VIBRATE (from @capacitor/haptics), plus BILLING from the legacy purchase plugin until it's removed. iOS: no `*UsageDescription` keys. Never add a plugin that needs more without asking.
 - The service worker is registered from `src/platform/serviceWorker.ts` on the web only, never inside the native apps.
 
-## One-time unlock (in-app purchase)
+## My plan
 
-- One non-consumable product, `full_unlock` ($6.99), bought through **StoreKit 2 / Google Play Billing directly** (`@capgo/native-purchases`, audited: no network/telemetry code). No RevenueCat or any purchase server, no API keys — the user chose this to keep rule 1.
-- `src/platform/purchases.ts` (adapter; web = unavailable, no web payments) → `src/app/unlock.ts` (`useUnlocked()`, `grantUnlock()`, silent `syncUnlockWithStore()`) → `UnlockPanel` (Library sheet, My plan). Restore purchases lives in the panel and in Settings (store rules require it).
-- The unlock is only ever granted, never auto-revoked: an offline/flaky store must not take features away mid-panic.
 - My plan fields are private: keep `PRIVATE_FIELD` (no spellcheck/grammar extensions) on every input that holds personal text.
+- `src/app/planStore.ts` caches the plan at startup; Done shows the person's note and a one-tap call to their contact.
+
+## Legacy: paid unlock (to be removed)
+
+The launch decision above makes all of this obsolete. It's recorded here so the removal task can find every piece. **Don't extend it.**
+
+- **What was built:** one non-consumable product, `full_unlock` ($6.99), bought through StoreKit 2 / Google Play Billing directly (`@capgo/native-purchases`). There was no purchase server and no RevenueCat, to keep the no-data rule.
+- **Code to remove:**
+  - `src/platform/purchases.ts` (+ test)
+  - `src/app/unlock.ts` (`initUnlock` in `main.tsx`, `useUnlocked` in Done / Plan / Settings)
+  - `src/components/UnlockPanel.tsx`
+  - the Library "unlock" section and Sheet
+  - the Settings purchase / Restore section
+  - the purchase adapter in `nativeAdapters.ts` (+ test)
+  - unlock storage keys in `storage.ts` (+ test)
+  - `locked` on protocols (`src/engine/types.ts`, `protocols.ts`)
+  - the `@capgo/native-purchases` dependency, so BILLING drops out of the Android manifest
+- **Docs and pages that still describe the purchase:**
+  - `public/privacy.html`
+  - `docs/store-listing.md`, `docs/release-checklist.md`, `docs/native.md`, `docs/deploy.md` (unlock-panel smoke test D), `docs/signing.md` (IAP capability)
+  - the Android manifest comment
+
+  When removing, also re-run `npx cap sync` so `ios/App/App/public` picks up the new privacy page.
+- **When removing, keep what was right about it:** nothing a person already has is ever taken away mid-panic, and My plan stays private and on-device.
