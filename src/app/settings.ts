@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react';
-import { en, type Strings } from '../content/strings';
+import { resolveLanguage, STRINGS, type Strings } from '../content/strings';
+import { deviceLocales } from '../platform/locale';
 import type { Settings } from '../platform/storage';
 
 export type { Settings };
@@ -19,5 +20,6 @@ export function useSettings(): SettingsApi {
 
 /** The UI text for the person's language. */
 export function useStrings(): Strings {
-  return en;
+  const { settings } = useSettings();
+  return STRINGS[resolveLanguage(settings.language, deviceLocales())];
 }

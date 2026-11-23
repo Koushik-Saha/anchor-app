@@ -153,6 +153,13 @@ CI (`.github/workflows/ci.yml`) runs typecheck → lint → test → build → s
 - My plan fields are private: keep `PRIVATE_FIELD` (no spellcheck/grammar extensions) on every input that holds personal text.
 - `src/app/planStore.ts` caches the plan at startup; Done shows the person's note and a one-tap call to their contact.
 
+## Languages
+
+- All UI text lives in `src/content/strings.ts` (`en`, `es`). Screens call `useStrings()`; never hard-code a user-facing string. `es` must have every `en` key (typed and tested), stay ≤ 8 words per reset-flow line, and be gender-neutral.
+- Language follows the device's first locale, with an override in Settings (`settings.language`). It's independent of the crisis line.
+- `npm run copy-scan` checks both languages.
+- Not localized yet: the iOS quick action title and the PWA manifest shortcut (English only).
+
 ## My reset (custom)
 
 - One saved custom reset (`customReset` in `storage.ts`), built in `Builder`. `customProtocol()` turns it into ordinary protocol data, reusing the built-in grounding and lines, so it plays through the same Reset screen and engine. Never add a second player.

@@ -15,6 +15,7 @@ import * as haptics from '../platform/haptics';
 import { deviceLocales } from '../platform/locale';
 
 const PITCHES = ['low', 'mid'] as const;
+const LANGUAGES = ['auto', 'en', 'es'] as const;
 
 function Group({ title, children }: { title: string; children: ReactNode }) {
   const id = useId();
@@ -101,6 +102,22 @@ export function Settings() {
             disabled={osReducedMotion}
             onChange={(on) => updateSettings({ reducedMotion: on })}
           />
+        </Group>
+
+        <Group title={s.settings.language}>
+          <div role="group" aria-label={s.settings.language} className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,7rem),1fr))] gap-2">
+            {LANGUAGES.map((value) => (
+              <CalmButton
+                key={value}
+                lang={value === 'en' ? 'en' : value === 'es' ? 'es' : undefined}
+                aria-pressed={settings.language === value}
+                className={cx('ring-2', settings.language === value ? 'text-ink ring-accent' : 'ring-transparent')}
+                onClick={() => updateSettings({ language: value })}
+              >
+                {value === 'auto' ? s.settings.languageAuto : value === 'en' ? 'English' : 'Español'}
+              </CalmButton>
+            ))}
+          </div>
         </Group>
 
         <Group title={s.settings.crisis}>

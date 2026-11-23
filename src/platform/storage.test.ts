@@ -210,6 +210,7 @@ describe('normalizeSettings', () => {
       installHintDismissed: true,
       breathPattern: '4-7-8',
       crisisRegion: 'ca',
+      language: 'es',
     };
     expect(normalizeSettings(stored)).toEqual(stored);
   });
@@ -229,7 +230,7 @@ describe('normalizeSettings', () => {
 
   it('settings saved before breathPattern existed keep every other value', () => {
     const old = { haptics: false, sound: true, largeText: true, reducedMotion: true, tonePitch: 'mid', installHintDismissed: true };
-    expect(normalizeSettings(old)).toEqual({ ...old, breathPattern: '4-2-6', crisisRegion: 'auto' });
+    expect(normalizeSettings(old)).toEqual({ ...old, breathPattern: '4-2-6', crisisRegion: 'auto', language: 'auto' });
   });
 
   it('settings saved before reducedMotion existed get it defaulted to false', () => {

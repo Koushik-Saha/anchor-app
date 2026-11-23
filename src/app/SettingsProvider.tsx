@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
+import { resolveLanguage } from '../content/strings';
 import * as audio from '../platform/audio';
 import * as haptics from '../platform/haptics';
+import { deviceLocales } from '../platform/locale';
 import { storage } from '../platform/storage';
 import { SettingsContext, type Settings } from './settings';
 
@@ -17,6 +19,11 @@ export function SettingsProvider({ initial, children }: SettingsProviderProps) {
   useLayoutEffect(() => {
     document.documentElement.toggleAttribute('data-large-text', settings.largeText);
   }, [settings.largeText]);
+
+  // Screen readers pick their voice from this.
+  useLayoutEffect(() => {
+    document.documentElement.lang = resolveLanguage(settings.language, deviceLocales());
+  }, [settings.language]);
 
   // App-level reduce motion: index.css applies the same rules as the OS media query.
   useLayoutEffect(() => {

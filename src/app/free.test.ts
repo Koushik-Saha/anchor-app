@@ -27,7 +27,7 @@ const PACKAGE_JSON = String(
 const source = (suffix: string) => UI_FILES.find(([path]) => path.endsWith(suffix))?.[1] ?? '';
 
 const PAYWALL_WORDS =
-  /unlock|purchas|paywall|premium|upgrade|\bpro version\b|\bbuy\b|full_unlock|\bentitle|restore purchases|\$\s?\d|one-time/i;
+  /unlock|purchas|paywall|premium|upgrade|\bpro version\b|\bbuy\b|full_unlock|\bentitle|restore purchases|\$\s?\d|one-time|desbloque|comprar|\bcompra\b|de pago/i;
 
 describe('Anchor is free', () => {
   it('found the UI source files to check', () => {

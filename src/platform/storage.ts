@@ -20,6 +20,9 @@ export type CrisisRegion = 'us' | 'ca' | 'uk-ie' | 'au' | 'other';
 /** 'auto' follows the device locale; anything else is the person's own choice. */
 export type CrisisChoice = 'auto' | CrisisRegion;
 
+/** UI language: 'auto' follows the device. Independent of the crisis line. */
+export type LanguageChoice = 'auto' | 'en' | 'es';
+
 export interface Settings {
   haptics: boolean;
   sound: boolean;
@@ -36,6 +39,7 @@ export interface Settings {
   breathPattern: string;
   /** Crisis line shown on Home and Done. */
   crisisRegion: CrisisChoice;
+  language: LanguageChoice;
 }
 
 export type Helped = 'breathing' | 'grounding' | 'both' | 'not-sure';
@@ -101,6 +105,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = {
   installHintDismissed: false,
   breathPattern: '4-2-6',
   crisisRegion: 'auto',
+  language: 'auto',
 };
 
 // ─── Validation: stored data may be old, partial or corrupt ──────────────────
@@ -128,6 +133,7 @@ export function normalizeSettings(raw: unknown): Settings {
         ? r.breathPattern
         : DEFAULT_SETTINGS.breathPattern,
     crisisRegion: isCrisisChoice(r.crisisRegion) ? r.crisisRegion : DEFAULT_SETTINGS.crisisRegion,
+    language: r.language === 'en' || r.language === 'es' || r.language === 'auto' ? r.language : DEFAULT_SETTINGS.language,
   };
 }
 

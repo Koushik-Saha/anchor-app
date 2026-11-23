@@ -21,7 +21,7 @@ function HistoryRow({ entry }: { entry: HistoryEntry }) {
         </span>
       </span>
       <span className="text-sm text-muted">
-        <time dateTime={entry.at}>{formatWhen(entry.at)}</time>
+        <time dateTime={entry.at}>{formatWhen(entry.at, s.dateLocale)}</time>
         {entry.helped && <> · {s.history.helped(helpedLabel(entry.helped, s))}</>}
       </span>
     </li>

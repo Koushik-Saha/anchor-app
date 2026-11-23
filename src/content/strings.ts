@@ -4,6 +4,8 @@
  */
 
 export const en = {
+  /** For dates in History. undefined = the device's own format. */
+  dateLocale: undefined as string | undefined,
   common: {
     home: 'Home',
     library: 'Library',
@@ -113,6 +115,8 @@ export const en = {
     motionOs: 'On in your device settings.',
     motionHint: 'The circle fades instead of growing.',
     crisis: 'Crisis line',
+    language: 'Language',
+    languageAuto: 'Automatic',
     yourData: 'Your data',
     history: 'History',
     about: 'About Anchor',
@@ -163,6 +167,196 @@ export const en = {
 };
 
 export type Strings = typeof en;
+
+/**
+ * Spanish. Written for meaning, in plain "tú", and gender-neutral (the reader's gender is
+ * unknown). "Reset" is "pausa"; "grounding" is "anclaje". Careful with two traps:
+ *   - "Esto siempre pasa" means "this always HAPPENS". Use "Esto también pasará".
+ *   - A lone "Sostén" also reads as "bra". Use "Retén" for a breath hold.
+ */
+export const es: Strings = {
+  dateLocale: 'es',
+  common: {
+    home: 'Inicio',
+    library: 'Biblioteca',
+    back: 'Atrás',
+    close: 'Cerrar',
+    next: 'Siguiente',
+    save: 'Guardar',
+    savedOnDevice: 'Guardado solo en este dispositivo.',
+    saveFailed: 'No se pudo guardar en este dispositivo.',
+    storedOnDevice: 'Guardado solo en este dispositivo.',
+  },
+  units: { sec: 'seg', min: 'min' },
+  home: { start: 'Empezar pausa', more: 'Más', library: 'Biblioteca', plan: 'Mi plan', whatHelped: 'Lo que ayudó', settings: 'Ajustes' },
+  reset: {
+    title: 'Pausa',
+    close: 'Cerrar',
+    skip: 'Saltar',
+    welcomeBack: 'Hola de nuevo.',
+    resume: 'Continuar',
+    startOver: 'Empezar de nuevo',
+    progress: (current, total) => `Parte ${current} de ${total}`,
+  },
+  breath: { inhale: 'Inhala', topUp: 'Un poco más', hold: 'Retén', exhale: 'Exhala', holdOut: 'Retén' },
+  patterns: {
+    '4-2-6': { name: 'Clásica', line: 'Inhala 4, retén 2, exhala 6' },
+    box: { name: 'Caja', line: 'Inhala, retén, exhala, retén: 4 cada uno' },
+    '4-7-8': { name: '4-7-8', line: 'Inhala 4, retén 7, exhala 8' },
+    'double-inhale': { name: 'Doble inhalación', line: 'Dos inhalaciones, una exhalación larga' },
+  },
+  grounding: {
+    see: 'Busca 5 cosas que puedas ver.',
+    touch: 'Fíjate en 4 cosas que puedas tocar.',
+    hear: 'Escucha 3 sonidos.',
+    smell: 'Fíjate en 2 olores.',
+    taste: 'Fíjate en 1 sabor.',
+  },
+  calm: {
+    passes: 'Esto también pasará.',
+    safe: 'Ahora mismo estás a salvo.',
+    circle: 'Solo respira con el círculo.',
+    slower: 'Cada respiración baja el ritmo.',
+    nothing: 'Nada que arreglar. Solo respira.',
+    body: 'Tu cuerpo sabe cómo calmarse.',
+  },
+  protocols: {
+    'classic-90': { name: 'Pausa clásica', description: 'Respira, ánclate, descansa. Los 90 segundos.' },
+    'breathing-60': { name: 'Solo respirar', description: 'Un minuto de respiración lenta con el círculo.' },
+    'grounding-only': { name: 'Solo anclaje', description: '5-4-3-2-1: vuelve a través de tus sentidos.' },
+    'box-breathing': { name: 'Respiración en caja', description: 'Inhala, retén, exhala, retén: cuatro tiempos.' },
+    'extended-3min': { name: 'Pausa larga', description: 'Más lenta, para cuando 90 segundos no bastan.' },
+    'night-protocol': { name: 'Pausa de noche', description: 'Muy tenue y en silencio, con exhalación larga.' },
+  },
+  library: { title: 'Biblioteca', build: 'Crear mi pausa', change: 'Cambiar mi pausa' },
+  picker: { subtitle: 'Elige un ritmo.' },
+  done: {
+    title: 'Lo lograste.',
+    subtitle: 'Esto también pasará.',
+    whatHelped: '¿Qué te ayudó?',
+    call: (name) => `Llamar a ${name}`,
+    callContact: 'Llamar a mi contacto',
+    again: 'Otra vez',
+  },
+  helped: { breathing: 'Respirar', grounding: 'Anclaje', both: 'Ambos', 'not-sure': 'No lo sé' },
+  history: {
+    title: 'Historial',
+    completed: 'Completada',
+    stopped: 'Detenida',
+    helped: (label) => `Ayudó: ${label}`,
+    empty: 'Nada por aquí todavía. Esta lista nunca sale de tu dispositivo.',
+    deleteAll: 'Borrar todo el historial',
+    fallbackName: 'Pausa',
+  },
+  whatHelped: {
+    title: 'Lo que ayudó',
+    none: 'Termina algunas pausas y aquí verás patrones.',
+    helped: (subject, count, total) =>
+      subject === 'both'
+        ? `Respirar y el anclaje te ayudaron ${count} de tus últimas ${total} veces.`
+        : `${subject === 'breathing' ? 'Respirar' : 'El anclaje'} te ayudó ${count} de tus últimas ${total} veces.`,
+    time: (hour) => `Usas Anchor sobre todo hacia ${hour === 1 ? 'la' : 'las'} ${hour}:00.`,
+    mostUsed: (name) => `Tu pausa más usada: ${name}.`,
+  },
+  plan: {
+    title: 'Mi plan',
+    private: 'Esto nunca sale de tu dispositivo.',
+    noteLabel: 'Nota para ti',
+    noteHint: 'Se muestra después de cada pausa.',
+    notePlaceholder: 'Esto pasará. Estás a salvo.',
+    contact: 'Contacto de emergencia',
+    name: 'Nombre',
+    phone: 'Teléfono',
+    phoneHint: 'Un toque para llamar después de una pausa.',
+    privateLabel: 'Nota privada (opcional)',
+    privateHint: 'Solo se ve aquí; por ejemplo, un recordatorio de medicación.',
+    delete: 'Borrar mi plan',
+  },
+  settings: {
+    title: 'Ajustes',
+    feel: 'Sensación',
+    haptics: 'Vibración',
+    sound: 'Sonido',
+    soundHint: 'Tonos suaves en cada cambio. Apagado por defecto.',
+    tonePitch: 'Tono',
+    low: 'Grave',
+    mid: 'Medio',
+    display: 'Pantalla',
+    largeText: 'Texto grande',
+    reduceMotion: 'Reducir movimiento',
+    motionOs: 'Activado en los ajustes del dispositivo.',
+    motionHint: 'El círculo se desvanece en vez de crecer.',
+    crisis: 'Línea de crisis',
+    language: 'Idioma',
+    languageAuto: 'Automático',
+    yourData: 'Tus datos',
+    history: 'Historial',
+    about: 'Acerca de Anchor',
+    disclaimer: 'Anchor es una herramienta de autoayuda, no un dispositivo médico ni un sustituto de la atención profesional.',
+    inCrisis: 'En crisis:',
+  },
+  crisis: {
+    prefix: '¿En crisis?',
+    call: 'Llama',
+    or: ' o ',
+    text: 'escribe',
+    number988: ' al 988',
+    callAria: (service) => `Llamar al 988, ${service}`,
+    textAria: (service) => `Escribir al 988, ${service}`,
+    usService: 'Prevención del Suicidio y Crisis', // copy-scan-ok: the service's Spanish name
+    caService: 'Suicide Prevention Service', // copy-scan-ok: a service name, kept in English
+    samaritans: 'Llama gratis a Samaritans, 116 123',
+    lifeline: 'Llama a Lifeline, 13 11 14',
+    elsewhere: 'o tu número local de emergencias',
+    choices: {
+      auto: 'Automático',
+      us: 'Estados Unidos',
+      ca: 'Canadá',
+      'uk-ie': 'Reino Unido e Irlanda',
+      au: 'Australia',
+      other: 'Otro lugar',
+    },
+  },
+  install: {
+    title: 'Ten Anchor en tu pantalla de inicio',
+    ios: 'Toca Compartir y luego “Añadir a pantalla de inicio”.',
+    prompt: 'Se abre con un toque y funciona sin conexión.',
+    menu: 'Abre el menú del navegador y elige “Añadir a pantalla de inicio”.',
+    add: 'Añadir a inicio',
+    notNow: 'Ahora no',
+  },
+  builder: {
+    defaultName: 'Mi pausa',
+    titles: {
+      steps: 'Elige tus pasos',
+      pattern: 'Elige un ritmo',
+      'breath-length': '¿Cuánto respirar?',
+      'lines-length': '¿Cuántas frases de calma?',
+      name: 'Ponle nombre',
+    },
+    stepsHint: 'Toca en orden. Respirar es obligatorio.',
+    steps: { breathing: 'Respirar', grounding: 'Anclaje', lines: 'Frases de calma' },
+    seconds: (sec) => `${sec} segundos`,
+    lineLengths: { short: 'Pocas', standard: 'Normal' },
+    nameLabel: 'Nombre corto',
+    start: 'Empezar',
+    change: 'Cambiarla',
+    delete: 'Borrarla',
+  },
+};
+
+export type Language = 'en' | 'es';
+export const STRINGS: Readonly<Record<Language, Strings>> = { en, es };
+
+/** Spanish if the device's first language is Spanish; everything else is English. */
+export function languageFromLocales(locales: readonly string[]): Language {
+  return /^es([-_]|$)/i.test(locales[0] ?? '') ? 'es' : 'en';
+}
+
+/** A manual choice in Settings wins over the device. */
+export function resolveLanguage(choice: 'auto' | Language, locales: readonly string[]): Language {
+  return choice === 'auto' ? languageFromLocales(locales) : choice;
+}
 
 /** A built-in reset's name and description, or undefined for a custom or retired id. */
 export function protocolText(s: Strings, id: string): { name: string; description: string } | undefined {

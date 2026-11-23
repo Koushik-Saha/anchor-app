@@ -46,6 +46,7 @@ Run on a real iPhone **and** a real Android phone, using a build made with `npm 
 - [ ] **Haptics fire** — Settings → Haptics on (you feel a tap). Start a reset: a soft tap at each turn of the breath, a stronger pulse at each phase change, a "success" pattern on Done. Haptics off → nothing.
 - [ ] **Screen stays awake** — set Auto-Lock (iOS) / Screen timeout (Android) to 30 s. Start classic-90: the screen stays on for the whole 93 s. After Done, it sleeps normally again.
 - [ ] **Deep link starts a reset** — (a) app fully closed → `anchor://start` → opens straight into the breathing circle; (b) app open on Home → reset starts; (c) already mid-reset → a fresh classic reset starts; (d) long-press the icon on Android **and** iPhone → **Start reset**, from closed, from the background and from another screen.
+- [ ] **Spanish** — device language Spanish → the app and (Android) the shortcut are in Spanish; Settings → Language → English overrides it. Crisis line doesn't change with the language.
 - [ ] **Airplane mode** — airplane mode on (Wi-Fi off too), force-quit Anchor, open it → full reset to Done → answer "What helped?" → History shows it. Force-quit and reopen → settings and history are still there (stored in Capacitor Preferences).
 - [ ] **Leaving mid-reset** — press Home during a reset, come back → "Welcome back." with Resume / Start over.
 - [ ] **Zero permission prompts** — none at install or during use. Android *Settings → Apps → Anchor → Permissions*: nothing to grant. iOS *Settings → Anchor*: no permission switches.

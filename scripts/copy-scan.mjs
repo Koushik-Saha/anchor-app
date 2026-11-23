@@ -25,6 +25,18 @@ const HIGH = [
   /\bprevent(s|ion|ing)?\b/i,
   /\b(stops?|ends?|eliminates?|reduces?|lowers?|fix(es)?)\s+(your\s+)?(panic|anxiety|stress|attacks?|symptoms?)\b/i,
   /\b(proven|evidence[- ]based|scientifically|guaranteed?|doctor[- ]approved|fda)\b/i,
+  // Spanish
+  /\btrat(a|an|ar|amos|amiento|amientos)\b/i,
+  /\bcur(a|an|ar|aci[oó]n)\b/i,
+  /\bsan(a|an|ar|aci[oó]n)\b/i,
+  /\bterap(ia|ias|[eé]utic|euta)/i,
+  /\bdiagn[oó]stic/i,
+  /\bcl[ií]nic/i,
+  /\b(receta|prescrib|prescripci)/i,
+  /\balivi(o|a|an|ar)\b/i,
+  /\bprev(iene|ienen|enir|enci[oó]n)/i,
+  /\b(reduce|reducen|elimina|eliminan|quita|quitan|detiene|detienen|baja|bajan|calma|calman|cura|curan)\s+(el\s+|la\s+|los\s+|las\s+|tu\s+|tus\s+)?(p[aá]nico|ansiedad|estr[eé]s|ataques?|s[ií]ntomas?)/i,
+  /\b(probado|comprobado|basado en evidencia|cient[ií]ficamente|garantizad[oa])\b/i,
 ];
 const REVIEW = [
   /\bmedic(al|ine|ines|ation|ations)\b/i,
@@ -32,6 +44,13 @@ const REVIEW = [
   /\b(disorder|patients?|illness|disease|psychiatr\w*)\b/i,
   /\bmental health\b/i,
   /\bhealth ?care\b/i,
+  // Spanish
+  /\bm[eé]dic(o|a|os|as|ina|inas)\b/i,
+  /\bmedicaci[oó]n\b/i,
+  /\bmedicamentos?\b/i,
+  /\bs[ií]ntomas?\b/i,
+  /\b(trastornos?|pacientes?|enfermedad(es)?|psiqui[aá]tr)/i,
+  /\bsalud mental\b/i,
 ];
 
 const SOURCES = [
@@ -40,6 +59,7 @@ const SOURCES = [
   'index.html',
   'vite.config.ts',
   'android/app/src/main/res/values/strings.xml',
+  'android/app/src/main/res/values-es/strings.xml',
   'android/app/src/main/res/xml/shortcuts.xml',
   'ios/App/App/Info.plist',
   'docs/store-listing.md',
@@ -66,7 +86,7 @@ if (SOURCES.length < 10) {
 }
 
 /** A claim word right after "no / not / never / without" is a disclaimer, not a claim. */
-const NEGATION = /\b(no|not|never|without|nor)\b[^.;:]{0,60}$/i;
+const NEGATION = /\b(no|not|never|without|nor|sin|nunca|ni)\b[^.;:]{0,60}$/i;
 const classify = (line) => {
   let negated = false;
   for (const r of HIGH) {
