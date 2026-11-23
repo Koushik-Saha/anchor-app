@@ -46,13 +46,18 @@ export interface PanicPlan {
 export interface LocalData {
   settings: Settings;
   history: HistoryEntry[];
-  unlocked: boolean;
   panicPlan?: PanicPlan;
 }
 
 export type StorageKey = keyof LocalData;
 
-const STORAGE_KEYS = ['settings', 'history', 'unlocked', 'panicPlan'] as const satisfies readonly StorageKey[];
+const STORAGE_KEYS = ['settings', 'history', 'panicPlan'] as const satisfies readonly StorageKey[];
+/**
+ * Keys older versions wrote that nothing reads any more. Left as they are on the
+ * device (no startup migration touches stored data); only clearAll() removes them.
+ * 'unlocked': the one-time purchase flag from before Anchor became free.
+ */
+const RETIRED_KEYS = ['unlocked'] as const;
 const PREFIX = 'anchor:v1:';
 /** Oldest entries are dropped beyond this, so storage can't grow forever. */
 export const MAX_HISTORY = 500;
@@ -171,9 +176,6 @@ export interface AppStorage {
   setHistoryHelped(at: string, helped: Helped): Promise<boolean>;
   clearHistory(): Promise<void>;
 
-  isUnlocked(): Promise<boolean>;
-  setUnlocked(unlocked: boolean): Promise<boolean>;
-
   getPanicPlan(): Promise<PanicPlan | undefined>;
   savePanicPlan(plan: PanicPlan): Promise<boolean>;
 }
@@ -226,6 +228,13 @@ export function createStorage(backend: StorageBackend): AppStorage {
     remove,
     async clearAll() {
       for (const key of STORAGE_KEYS) await remove(key);
+      for (const key of RETIRED_KEYS) {
+        try {
+          await backend.removeItem(PREFIX + key);
+        } catch {
+          /* ignore */
+        }
+      }
     },
 
     getSettings: async () => normalizeSettings(await getJSON('settings')),
@@ -250,9 +259,6 @@ export function createStorage(backend: StorageBackend): AppStorage {
         return false;
       }),
     clearHistory: () => inHistoryQueue(() => remove('history')),
-
-    isUnlocked: async () => (await getJSON('unlocked')) === true,
-    setUnlocked: (unlocked) => setJSON('unlocked', unlocked),
 
     getPanicPlan: async () => normalizePanicPlan(await getJSON('panicPlan')),
     savePanicPlan: (plan) => setJSON('panicPlan', plan),

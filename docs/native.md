@@ -50,30 +50,15 @@ Run on a real iPhone **and** a real Android phone, using a build made with `npm 
 - [ ] **Zero permission prompts** — none at install or during use. Android *Settings → Apps → Anchor → Permissions*: nothing to grant. iOS *Settings → Anchor*: no permission switches.
 - [ ] **988 links** — "Call" opens the dialer, "text" opens Messages.
 
-## One-time unlock (in-app purchase)
+## Everything is free
 
-Product `full_unlock`, **non-consumable**, $6.99 — bought directly through StoreKit 2 / Google Play Billing. No third-party server and no API keys.
+Anchor has no in-app purchases and no locked features. There's no store product to set up.
 
-### iOS
-1. **Xcode:** select the **App** target → *Signing & Capabilities* → **+ Capability** → **In-App Purchase**.
-2. **Fast local test (no App Store Connect needed):** *File → New → File… → StoreKit Configuration File* → name it `Anchor`. Click **+** → *Add Non-Consumable In-App Purchase* → Reference Name `Full unlock`, Product ID `full_unlock`, Price `6.99`. Then *Product → Scheme → Edit Scheme… → Run → Options → StoreKit Configuration* → `Anchor.storekit`. Run on the iPhone; *Debug → StoreKit → Manage Transactions* lets you refund/delete purchases.
-3. **Sandbox (real App Store flow):** in App Store Connect create the app (`app.anchor.reset`), sign the *Paid Apps* agreement (products don't load without it), then *In-App Purchases → +* → Non-Consumable, ID `full_unlock`, price $6.99. *Users and Access → Sandbox → Test Accounts* → add a tester. On the iPhone: *Settings → App Store → Sandbox Account* → sign in. Run from Xcode with the StoreKit Configuration set to **None**.
-
-### Android
-1. Play Console → create the app (`app.anchor.reset`) → upload a signed AAB (*Build → Generate Signed App Bundle*) to **Internal testing** — Play won't let you create products before a build with billing is uploaded.
-2. *Monetize → Products → In-app products* → create `full_unlock`, $6.99, **Activate**.
-3. *Setup → License testing* → add your Google account; add it to the internal testing track too, open the opt-in link on the phone and **install Anchor from Play** (sideloaded builds can't buy).
-4. License testers get test cards: "always approves", "always declines", and "slow test card" (approves after a few minutes — tests the pending path).
-
-### Purchase test checklist
-- [ ] Web build: locked card / My plan → "Unlock in the free mobile app." — no purchase button.
-- [ ] Library → locked protocol → price shows in your currency → **Unlock** → store sheet → buy → "Unlocked. Thank you." → **Start <protocol>** works. My plan opens.
-- [ ] Cancel the store sheet → back to the panel, no error message.
-- [ ] Android declined card → "The purchase didn't go through…". Slow card → "Waiting for the store to confirm…", and the unlock appears on its own a few minutes later.
-- [ ] **Restore on a fresh install:** buy → delete the app → reinstall → open Library. Expected: already unlocked (silent entitlement check). If not, *Settings → Restore purchases* → "One-time unlock · Active".
-- [ ] Restore with a different store account that never bought → "No earlier purchase found for this account."
-- [ ] Airplane mode after unlocking → everything still unlocked (the flag is stored on the device).
-- [ ] Android: *Merged Manifest* tab in Android Studio shows only VIBRATE, com.android.vending.BILLING and the app-private `app.anchor.reset.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` (added by AndroidX Core, signature-level, never shown to users) — no INTERNET.
+- [ ] **Library** → each of the six resets (Classic, Breathing, Grounding, Box breathing, Extended, Night) starts straight away with one tap. No lock badge, price or extra panel.
+- [ ] **My plan** (Home → My plan) opens the form directly. Write a note and a contact, finish a reset → Done shows the note and **Call <name>**.
+- [ ] Nowhere in the app (Home, Library, My plan, Done, History, Settings) mentions unlocking, buying, restoring or upgrading. Settings has no Purchase section.
+- [ ] **Upgrade from an older build** that had the paid unlock: install the new build over it, without deleting the old one first. My plan, settings and history are all still there.
+- [ ] Android: the *Merged Manifest* tab in Android Studio should show only VIBRATE and the app-private `app.anchor.reset.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`. That second one is added by AndroidX Core; it's signature-level and never shown to users. There should be no INTERNET and **no BILLING**: BILLING came from the purchase plugin, which has been removed.
 
 ## What's configured where
 
@@ -84,6 +69,6 @@ Product `full_unlock`, **non-consumable**, $6.99 — bought directly through Sto
 | Icons | `Assets.xcassets/AppIcon.appiconset` (1024, opaque) | vector adaptive + themed icon (`drawable/ic_launcher_foreground.xml`), PNG legacy icons |
 | Splash | `Splash.imageset` + slate `LaunchScreen.storyboard` | `values/styles.xml` (Android 12+ API, `drawable/splash_icon.xml`), `drawable*/splash.png` |
 | Status bar | light content, `UIUserInterfaceStyle` Dark | `SystemBars`/`StatusBar` DARK, slate bars |
-| Permissions | no usage-description keys | INTERNET removed; VIBRATE (@capacitor/haptics) and com.android.vending.BILLING (Play Billing) — both install-time, never prompted |
+| Permissions | no usage-description keys | INTERNET removed; only VIBRATE (@capacitor/haptics), install-time, never prompted |
 
 Raster icons and splash images are generated by `scripts/generate-icons.sh` from `public/icon*.svg` and `resources/mark.svg`.

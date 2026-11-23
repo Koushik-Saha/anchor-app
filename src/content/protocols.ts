@@ -33,14 +33,13 @@ const grounding = (secPerStep: number): GroundingPhase => ({ kind: 'grounding', 
 
 const lines = (secPerLine: number, ...text: string[]): LinesPhase => ({ kind: 'lines', lines: text, secPerLine });
 
-// ─── Free core ───────────────────────────────────────────────────────────────
+// ─── Core ───────────────────────────────────────────────────────────────
 
 /** 4×12s breathing (48s) + 5×6s grounding (30s) + 3×5s lines (15s) = 93s. */
 export const classic90 = {
   id: 'classic-90',
   name: 'Classic reset',
   description: 'Breathe, ground, settle. The full 90 seconds.',
-  locked: false,
   approxSeconds: 90,
   phases: [
     breathing(4),
@@ -54,7 +53,6 @@ export const breathing60 = {
   id: 'breathing-60',
   name: 'Just breathing',
   description: 'One minute of slow breathing with the circle.',
-  locked: false,
   approxSeconds: 60,
   phases: [breathing(5)],
 } as const satisfies Protocol;
@@ -64,19 +62,17 @@ export const groundingOnly = {
   id: 'grounding-only',
   name: 'Just grounding',
   description: '5-4-3-2-1: come back through your senses.',
-  locked: false,
   approxSeconds: 40,
   phases: [grounding(6), lines(5, 'This always passes.', 'You are safe right now.')],
 } as const satisfies Protocol;
 
-// ─── Unlock ──────────────────────────────────────────────────────────────────
+// ─── More ways ────────────────────────────────────────────────────────────────
 
 /** 4×16s = 64s. */
 export const boxBreathing = {
   id: 'box-breathing',
   name: 'Box breathing',
   description: 'In, hold, out, hold: four even counts.',
-  locked: true,
   approxSeconds: 65,
   phases: [breathing(4, { inhaleSec: 4, holdSec: 4, exhaleSec: 4, holdOutSec: 4 })],
 } as const satisfies Protocol;
@@ -86,7 +82,6 @@ export const extended3min = {
   id: 'extended-3min',
   name: 'Extended reset',
   description: 'A slower, longer reset for when 90 seconds isn’t enough.',
-  locked: true,
   approxSeconds: 180,
   phases: [
     breathing(6),
@@ -108,7 +103,6 @@ export const nightProtocol = {
   id: 'night-protocol',
   name: 'Night reset',
   description: 'Extra dim and silent, with a longer exhale.',
-  locked: true,
   approxSeconds: 55,
   noTones: true,
   extraDim: true,
@@ -117,7 +111,7 @@ export const nightProtocol = {
 
 // ─── Typed list ──────────────────────────────────────────────────────────────
 
-/** Library order: free first, then locked. */
+/** Library order (all free): the three core resets, then box, extended and night. */
 export const protocols = [classic90, breathing60, groundingOnly, boxBreathing, extended3min, nightProtocol] as const;
 
 export type ProtocolId = (typeof protocols)[number]['id'];

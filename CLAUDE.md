@@ -29,7 +29,8 @@ Anchor is a **self-help / wellness tool, not a medical device**. Copy describes 
 
 - There is **no paywall, no in-app purchase and no locked feature**. Every protocol and My plan are available to everyone.
 - **Do not add** payment, entitlement-gating, "pro" or unlock code, store-billing plugins or purchase SDKs.
-- *Supersedes* the earlier one-time-unlock plan ($6.99 `full_unlock`). That code is still in the repo and must be removed in its own task; see **Legacy: paid unlock (to be removed)** below. Until then, don't extend it.
+- *Supersedes* the earlier one-time-unlock plan ($6.99 `full_unlock`). It was removed on 2026-11-22; see **History: the paid unlock (removed)** below.
+- `src/app/free.test.ts` enforces this. It fails if any UI source mentions unlock / purchase / upgrade / price wording, if anything imports a purchase module, if a billing dependency comes back, or if Library or My plan regains a gate. Don't weaken it; fix the code instead.
 
 ## Stack and gates
 
@@ -116,7 +117,7 @@ CI (`.github/workflows/ci.yml`) runs typecheck → lint → test → build → s
   - `Screen` — page layout (480px column, safe areas); `bottom` prop for a `BottomBar`.
   - `BigButton` — primary action, accent, min 96px. One per screen at most.
   - `CalmButton` — secondary; `variant="surface"` (64px, OK in reset flow) or `"quiet"` (48px text link, outside reset flow only).
-  - `ScreenTitle`, `BottomBar`, `Toggle` (settings switch, optional description/disabled), `Sheet` (native-<dialog> bottom panel — never in the reset flow), `ProgressDots`, `CrisisLine` (988 line), `BreathMark` (logo), `StubScreen` (temporary), `DeviceCheck` (adapter test panel, dev builds only).
+  - `ScreenTitle`, `BottomBar`, `Toggle` (settings switch, optional description/disabled), `ProgressDots`, `CrisisLine` (988 line), `BreathMark` (logo), `StubScreen` (temporary), `DeviceCheck` (adapter test panel, dev builds only).
   - Reduced motion = OS setting OR `settings.reducedMotion`: use `useReducedMotion()`, never the media query alone.
   - `cx()` + `focusRing` in `cx.ts`.
 
@@ -142,7 +143,7 @@ CI (`.github/workflows/ci.yml`) runs typecheck → lint → test → build → s
 - Exit/skip must always be visible in the reset flow; no popups, upsells, or permission prompts during a reset.
 - Native apps: Capacitor 8, `capacitor.config.ts`, projects in `ios/` (SPM) and `android/`. After any web change: `npm run build && npx cap sync`. Build/run steps + device checklist: `docs/native.md`.
 - Native adapters (`src/platform/nativeAdapters.ts`: Preferences, Haptics, KeepAwake, App deep links) are loaded only via dynamic import when `isNative()` — never import Capacitor plugins anywhere else, so the web bundle stays plugin-free.
-- Permissions: none at runtime. Android: INTERNET removed in the manifest; VIBRATE (from @capacitor/haptics), plus BILLING from the legacy purchase plugin until it's removed. iOS: no `*UsageDescription` keys. Never add a plugin that needs more without asking.
+- Permissions: none at runtime. Android: INTERNET removed in the manifest; only VIBRATE (from @capacitor/haptics). iOS: no `*UsageDescription` keys. Never add a plugin that needs more without asking.
 - The service worker is registered from `src/platform/serviceWorker.ts` on the web only, never inside the native apps.
 
 ## My plan
@@ -150,25 +151,12 @@ CI (`.github/workflows/ci.yml`) runs typecheck → lint → test → build → s
 - My plan fields are private: keep `PRIVATE_FIELD` (no spellcheck/grammar extensions) on every input that holds personal text.
 - `src/app/planStore.ts` caches the plan at startup; Done shows the person's note and a one-tap call to their contact.
 
-## Legacy: paid unlock (to be removed)
+## History: the paid unlock (removed 2026-11-22)
 
-The launch decision above makes all of this obsolete. It's recorded here so the removal task can find every piece. **Don't extend it.**
-
-- **What was built:** one non-consumable product, `full_unlock` ($6.99), bought through StoreKit 2 / Google Play Billing directly (`@capgo/native-purchases`). There was no purchase server and no RevenueCat, to keep the no-data rule.
-- **Code to remove:**
-  - `src/platform/purchases.ts` (+ test)
-  - `src/app/unlock.ts` (`initUnlock` in `main.tsx`, `useUnlocked` in Done / Plan / Settings)
-  - `src/components/UnlockPanel.tsx`
-  - the Library "unlock" section and Sheet
-  - the Settings purchase / Restore section
-  - the purchase adapter in `nativeAdapters.ts` (+ test)
-  - unlock storage keys in `storage.ts` (+ test)
-  - `locked` on protocols (`src/engine/types.ts`, `protocols.ts`)
-  - the `@capgo/native-purchases` dependency, so BILLING drops out of the Android manifest
-- **Docs and pages that still describe the purchase:**
-  - `public/privacy.html`
-  - `docs/store-listing.md`, `docs/release-checklist.md`, `docs/native.md`, `docs/deploy.md` (unlock-panel smoke test D), `docs/signing.md` (IAP capability)
-  - the Android manifest comment
-
-  When removing, also re-run `npx cap sync` so `ios/App/App/public` picks up the new privacy page.
-- **When removing, keep what was right about it:** nothing a person already has is ever taken away mid-panic, and My plan stays private and on-device.
+- **What it was:** until 2026-11-22, Box breathing, Extended reset, Night reset and My plan sat behind a one-time $6.99 purchase (`full_unlock`, `@capgo/native-purchases`). All of it is gone:
+  - the code (`unlock.ts`, `purchases.ts`, `UnlockPanel`, `Sheet`, the `locked` field);
+  - the plugin;
+  - the store copy.
+- **On-device data:** older installs may still hold the key `anchor:v1:unlocked`.
+  - It's listed in `RETIRED_KEYS` in `storage.ts`. Nothing reads or rewrites it, and only `clearAll()` deletes it.
+  - **Never add a startup migration that deletes or rewrites stored data.** People's My plan, settings and history must survive every update (tested in `storage.test.ts`, "upgrading from the paid version").

@@ -32,17 +32,17 @@ const brokenBackend: StorageBackend = {
 describe('JSON layer', () => {
   it('round-trips values and removes them', async () => {
     const s = createStorage(createMemoryBackend());
-    expect(await s.setJSON('unlocked', true)).toBe(true);
-    expect(await s.getJSON('unlocked')).toBe(true);
-    await s.remove('unlocked');
-    expect(await s.getJSON('unlocked')).toBeUndefined();
+    expect(await s.setJSON('panicPlan', { note: 'x' })).toBe(true);
+    expect(await s.getJSON('panicPlan')).toEqual({ note: 'x' });
+    await s.remove('panicPlan');
+    expect(await s.getJSON('panicPlan')).toBeUndefined();
   });
 
   it('namespaces keys so other apps on the origin are untouched', async () => {
     const backend = createMemoryBackend();
-    await createStorage(backend).setJSON('unlocked', true);
-    expect(await backend.getItem('anchor:v1:unlocked')).toBe('true');
-    expect(await backend.getItem('unlocked')).toBeNull();
+    await createStorage(backend).setJSON('history', []);
+    expect(await backend.getItem('anchor:v1:history')).toBe('[]');
+    expect(await backend.getItem('history')).toBeNull();
   });
 
   it('returns undefined for corrupt JSON instead of throwing', async () => {
@@ -60,8 +60,8 @@ describe('JSON layer', () => {
 
   it('never throws when the backend fails (sync or async)', async () => {
     const s = createStorage(brokenBackend);
-    expect(await s.setJSON('unlocked', true)).toBe(false);
-    expect(await s.getJSON('unlocked')).toBeUndefined();
+    expect(await s.setJSON('history', [])).toBe(false);
+    expect(await s.getJSON('history')).toBeUndefined();
     expect(await s.getSettings()).toEqual(DEFAULT_SETTINGS);
     expect(await s.getHistory()).toEqual([]);
     expect(await s.addHistoryEntry(entry(1))).toBe(false);
@@ -70,8 +70,8 @@ describe('JSON layer', () => {
 
   it('web backend falls back to memory when localStorage is unavailable (Node)', async () => {
     const s = createStorage(createWebStorageBackend());
-    await s.setUnlocked(true);
-    expect(await s.isUnlocked()).toBe(true);
+    await s.savePanicPlan({ note: 'x' });
+    expect(await s.getPanicPlan()).toEqual({ note: 'x' });
   });
 });
 
@@ -132,16 +132,6 @@ describe('typed helpers', () => {
     expect(history[0]).toEqual(entry(1, { helped: 'breathing' }));
   });
 
-  it('unlocked: false unless exactly true', async () => {
-    const backend = createMemoryBackend();
-    const s = createStorage(backend);
-    expect(await s.isUnlocked()).toBe(false);
-    await backend.setItem('anchor:v1:unlocked', '"true"');
-    expect(await s.isUnlocked()).toBe(false);
-    await s.setUnlocked(true);
-    expect(await s.isUnlocked()).toBe(true);
-  });
-
   it('panic plan round-trips', async () => {
     const s = createStorage(createMemoryBackend());
     const plan = { contactName: 'Sam', contactPhone: '+15550100', note: 'This passes.' };
@@ -149,14 +139,15 @@ describe('typed helpers', () => {
     expect(await s.getPanicPlan()).toEqual(plan);
   });
 
-  it('clearAll removes every key', async () => {
-    const s = createStorage(createMemoryBackend());
-    await s.setUnlocked(true);
+  it('clearAll removes every key, including retired ones from older versions', async () => {
+    const backend = createMemoryBackend();
+    const s = createStorage(backend);
+    await backend.setItem('anchor:v1:unlocked', 'true'); // written by the old paid version
     await s.addHistoryEntry(entry(1));
     await s.savePanicPlan({ note: 'x' });
     await s.saveSettings({ ...DEFAULT_SETTINGS, largeText: true });
     await s.clearAll();
-    expect(await s.isUnlocked()).toBe(false);
+    expect(await backend.getItem('anchor:v1:unlocked')).toBeNull();
     expect(await s.getHistory()).toEqual([]);
     expect(await s.getPanicPlan()).toBeUndefined();
     expect(await s.getSettings()).toEqual(DEFAULT_SETTINGS);
@@ -167,8 +158,38 @@ describe('setStorageBackend', () => {
   it('redirects the app-wide storage instance without changing call sites', async () => {
     const native = createMemoryBackend();
     setStorageBackend(native);
-    await storage.setUnlocked(true);
-    expect(await native.getItem('anchor:v1:unlocked')).toBe('true');
+    await storage.savePanicPlan({ note: 'x' });
+    expect(await native.getItem('anchor:v1:panicPlan')).toBe('{"note":"x"}');
+  });
+});
+
+describe('upgrading from the paid version (now free)', () => {
+  it('keeps the saved plan, settings and history exactly as they were', async () => {
+    // A device as the old version left it: purchase flag + My plan + settings + history.
+    const backend = createMemoryBackend();
+    const plan = { contactName: 'Sam', contactPhone: '+15550100', note: 'This passes.', medsNote: 'Inhaler, blue bag.' };
+    const settings = { ...DEFAULT_SETTINGS, largeText: true, sound: true, tonePitch: 'mid' as const };
+    await backend.setItem('anchor:v1:unlocked', 'true');
+    await backend.setItem('anchor:v1:panicPlan', JSON.stringify(plan));
+    await backend.setItem('anchor:v1:settings', JSON.stringify(settings));
+    await backend.setItem('anchor:v1:history', JSON.stringify([entry(1, { helped: 'both' })]));
+    const before = new Map(await Promise.all(
+      ['unlocked', 'panicPlan', 'settings', 'history'].map(async (k) => [k, await backend.getItem(`anchor:v1:${k}`)] as const),
+    ));
+
+    const s = createStorage(backend);
+    expect(await s.getPanicPlan()).toEqual(plan);
+    expect(await s.getSettings()).toEqual(settings);
+    expect(await s.getHistory()).toEqual([entry(1, { helped: 'both' })]);
+
+    // Reading never rewrites or deletes anything — no migration wipes the device.
+    for (const [k, raw] of before) expect(await backend.getItem(`anchor:v1:${k}`)).toBe(raw);
+  });
+
+  it('a device that never bought anything reads the same way (no purchase state needed)', async () => {
+    const backend = createMemoryBackend();
+    await backend.setItem('anchor:v1:panicPlan', JSON.stringify({ note: 'Slow breath out.' }));
+    expect(await createStorage(backend).getPanicPlan()).toEqual({ note: 'Slow breath out.' });
   });
 });
 

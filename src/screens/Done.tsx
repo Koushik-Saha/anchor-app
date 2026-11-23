@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useNavigation } from '../app/navigation';
-import { callLabel, telHref } from '../app/plan';
+import { callLabel, planOnDone } from '../app/plan';
 import { getCachedPlan } from '../app/planStore';
-import { useUnlocked } from '../app/unlock';
 import { BottomBar } from '../components/BottomBar';
 import { CalmButton } from '../components/CalmButton';
 import { CrisisLine } from '../components/CrisisLine';
@@ -24,12 +23,10 @@ export function Done({ protocolId, completedAt }: DoneProps) {
   const { navigate } = useNavigation();
   const [helped, setHelped] = useState<Helped | null>(null);
   const [saveState, setSaveState] = useState<'idle' | 'saved' | 'failed'>('idle');
-  const unlocked = useUnlocked();
-  // My plan (part of the unlock): their own note, and a one-tap call to their person.
+  // My plan: their own note, and a one-tap call to their person (shown whenever they saved one).
   // Read from the startup cache so it's there on the first frame (no layout shift).
   const plan: PanicPlan | undefined = getCachedPlan();
-  const note = unlocked ? plan?.note : undefined;
-  const tel = unlocked ? telHref(plan?.contactPhone) : null;
+  const { note, tel } = planOnDone(plan);
 
   // Optional, one tap. Tapping another option changes the answer.
   const answer = async (value: Helped) => {

@@ -60,7 +60,7 @@ Apple signing identities live in your **Mac's Keychain** and your **Apple Develo
    - **Automatically manage signing**: on
    - **Team**: your team
    - **Bundle Identifier**: `app.anchor.reset`
-   - **+ Capability → In-App Purchase**
+   - No extra capabilities: Anchor has no in-app purchases.
 4. Add `ios/App/App/PrivacyInfo.xcprivacy` to the App target (drag it into the *App* group and tick *Target Membership: App*).
 5. Destination **Any iOS Device (arm64)** → **Product → Archive** → *Distribute App* → *App Store Connect* → *Upload*. On the first archive, Xcode creates an **Apple Distribution** certificate in your Keychain automatically.
 

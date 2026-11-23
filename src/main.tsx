@@ -4,7 +4,6 @@ import './index.css';
 import { App } from './App';
 import { consumeLaunchRoute, routeFromUrl } from './app/launch';
 import { loadPlan } from './app/planStore';
-import { initUnlock } from './app/unlock';
 import type { Route } from './app/navigation';
 import { SettingsProvider } from './app/SettingsProvider';
 import * as deepLinks from './platform/deepLinks';
@@ -36,8 +35,8 @@ async function boot(): Promise<Route> {
 
 void boot().then(async (initialRoute) => {
   install.init(); // beforeinstallprompt can fire before React mounts
-  // Settings and the unlock flag come from on-device storage before the first paint.
-  const [initialSettings] = await Promise.all([storage.getSettings(), initUnlock(), loadPlan()]);
+  // Settings and My plan come from on-device storage before the first paint (read-only: nothing is migrated).
+  const [initialSettings] = await Promise.all([storage.getSettings(), loadPlan()]);
   createRoot(root).render(
     <StrictMode>
       <SettingsProvider initial={initialSettings}>

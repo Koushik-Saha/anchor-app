@@ -16,6 +16,15 @@ export function telHref(phone: string | undefined): string | null {
   return `tel:${plus}${digits}`;
 }
 
+/**
+ * What Done shows from My plan: the person's note and a one-tap call link.
+ * Depends only on what they saved: Anchor is free, so nothing else can hide it.
+ */
+export function planOnDone(plan: PanicPlan | undefined): { note: string | undefined; tel: string | null } {
+  const note = plan?.note?.trim() || undefined;
+  return { note, tel: telHref(plan?.contactPhone) };
+}
+
 /** Label for the one-tap call button on Done. */
 export function callLabel(plan: PanicPlan | undefined): string {
   const name = plan?.contactName?.trim();

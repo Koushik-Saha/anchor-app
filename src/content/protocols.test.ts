@@ -24,15 +24,20 @@ function screenText(p: Protocol): string[] {
 const wordCount = (s: string) => s.trim().split(/\s+/).length;
 
 describe('bundled protocols', () => {
-  it('ships exactly the six spec protocols, free ones first', () => {
-    expect(all.map((p) => [p.id, p.locked])).toEqual([
-      ['classic-90', false],
-      ['breathing-60', false],
-      ['grounding-only', false],
-      ['box-breathing', true],
-      ['extended-3min', true],
-      ['night-protocol', true],
+  it('ships exactly the six spec protocols, in Library order', () => {
+    expect(all.map((p) => p.id)).toEqual([
+      'classic-90',
+      'breathing-60',
+      'grounding-only',
+      'box-breathing',
+      'extended-3min',
+      'night-protocol',
     ]);
+  });
+
+  it.each(cases)('%s is free: no lock, price or entitlement field on the data', (_id, p) => {
+    // Anchor is free: nothing about a protocol can gate it.
+    for (const key of Object.keys(p)) expect(key).not.toMatch(/lock|paid|premium|price|entitle|purchase/i);
   });
 
   it('have unique ids', () => {
@@ -53,8 +58,8 @@ describe('bundled protocols', () => {
     for (const text of screenText(p)) expect(wordCount(text), text).toBeLessThanOrEqual(8);
   });
 
-  it('the default protocol is free and exists', () => {
-    expect(getProtocol(DEFAULT_PROTOCOL_ID)?.locked).toBe(false);
+  it('the default protocol exists', () => {
+    expect(getProtocol(DEFAULT_PROTOCOL_ID)).toBeDefined();
     expect(defaultProtocol.id).toBe(DEFAULT_PROTOCOL_ID);
   });
 

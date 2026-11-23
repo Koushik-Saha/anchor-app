@@ -2,13 +2,11 @@ import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useNavigation } from '../app/navigation';
 import { PLAN_LIMITS } from '../app/plan';
 import { getCachedPlan, savePlan } from '../app/planStore';
-import { syncUnlockWithStore, useUnlocked } from '../app/unlock';
 import { BottomBar } from '../components/BottomBar';
 import { CalmButton } from '../components/CalmButton';
 import { cx, focusRing } from '../components/cx';
 import { Screen } from '../components/Screen';
 import { ScreenTitle } from '../components/ScreenTitle';
-import { UnlockPanel } from '../components/UnlockPanel';
 import type { PanicPlan } from '../platform/storage';
 
 type Fields = Required<Record<keyof PanicPlan, string>>;
@@ -185,12 +183,6 @@ function PlanForm() {
 
 export function Plan() {
   const { navigate } = useNavigation();
-  const unlocked = useUnlocked();
-
-  useEffect(() => {
-    void syncUnlockWithStore();
-  }, []);
-
   return (
     <Screen
       bottom={
@@ -199,8 +191,8 @@ export function Plan() {
         </BottomBar>
       }
     >
-      <ScreenTitle subtitle={unlocked ? undefined : 'Your own words, there after every reset.'}>My plan</ScreenTitle>
-      {unlocked ? <PlanForm /> : <UnlockPanel />}
+      <ScreenTitle>My plan</ScreenTitle>
+      <PlanForm />
     </Screen>
   );
 }

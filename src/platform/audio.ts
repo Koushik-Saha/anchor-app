@@ -32,7 +32,7 @@ export const PHASE_TONE = { durationMs: 700, gain: 0.06 } as const;
 export interface AudioAdapter {
   readonly supported: boolean;
   playTone(tone: ToneSpec): void;
-  /** Unlock audio output. Must be called from a user gesture. */
+  /** Enable audio output. Must be called from a user gesture. */
   prime(): void;
   /** Free audio hardware while sound is off. */
   suspend(): void;
@@ -73,7 +73,7 @@ export function createWebAudio(Ctor: AudioContextCtor | undefined = browserAudio
       if (!c) return;
       try {
         resume(c);
-        // A 1-sample silent buffer started inside the gesture unlocks output on iOS.
+        // A 1-sample silent buffer started inside the gesture enables output on iOS.
         const src = c.createBufferSource();
         src.buffer = c.createBuffer(1, 1, c.sampleRate);
         src.connect(c.destination);

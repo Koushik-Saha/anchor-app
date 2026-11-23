@@ -95,10 +95,10 @@ npx -y lighthouse@11.7.1 https://anchor.example.com --only-categories=pwa --view
 5. Answer "What helped?" and check History.
 6. *Expected differences on iOS web:* home-screen shortcuts (long-press → Start reset) aren't supported for web apps on iOS; the App Store app has `anchor://start` instead.
 
-### D. Unlock panel on the web (any browser)
-1. Library → tap **Box breathing**. The panel shows *"Part of the one-time unlock — $6.99, no subscription."* and *"Unlock in the free mobile app."* It has **no Unlock or Restore purchases button**, and no payment form of any kind.
-2. My plan shows the same message.
-3. Settings has **no Purchase section** on the web.
+### D. Everything free on the web (any browser)
+1. Library → tap **Box breathing**. It starts straight away: no panel, price or lock badge. Do the same with **Extended reset** and **Night reset**.
+2. Home → **My plan** opens the form directly. Save a note, finish a reset, and Done shows it.
+3. No screen mentions unlocking, buying or the mobile app. Settings has no Purchase section.
 
 ### E. Privacy page
 - `https://anchor.example.com/privacy.html` loads over HTTPS in the dark theme, with the real contact email (not `example.com`).
@@ -107,4 +107,4 @@ npx -y lighthouse@11.7.1 https://anchor.example.com --only-categories=pwa --view
 ### F. Update check (after your *second* deploy)
 - Open the installed app, close it, and open it again. It should be on the new version: the service worker updates in the background and takes over on the next launch.
 
-> All of A, and the offline / unlock / privacy parts of B–E, were run automatically against this exact Docker image on localhost before release: 28/28 HTTP checks, plus a full 94 s classic reset offline with zero console errors or CSP violations. Real phones are still needed for install, haptics and wake lock.
+> All of A, and the offline / privacy parts of B–E, were run automatically against this exact Docker image on localhost before release: 28/28 HTTP checks, plus a full 94 s classic reset offline with zero console errors or CSP violations. Real phones are still needed for install, haptics and wake lock.

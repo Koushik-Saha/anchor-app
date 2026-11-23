@@ -45,8 +45,6 @@ export interface Protocol {
   name: string;
   /** One line for the library card. */
   description: string;
-  /** Free core protocols are `false`; `true` requires the one-time unlock. */
-  locked: boolean;
   /** Rounded duration shown to the user. Must stay within 10% of the real total (tested). */
   approxSeconds: number;
   phases: readonly Phase[];

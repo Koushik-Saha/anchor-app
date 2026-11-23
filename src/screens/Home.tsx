@@ -13,7 +13,7 @@ export function Home() {
 
   // One tap — or one key — from app open to a running reset.
   const start = () => {
-    audio.prime(); // this gesture unlocks sound for the reset's timed tones (iOS)
+    audio.prime(); // this gesture enables sound for the reset's timed tones (iOS)
     navigate({ view: 'reset', protocolId: DEFAULT_PROTOCOL_ID });
   };
   const startRef = useRef(start);

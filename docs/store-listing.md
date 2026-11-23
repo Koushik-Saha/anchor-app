@@ -52,9 +52,9 @@ GENTLE ON PURPOSE
 • Dark, dim and quiet — designed for 2 a.m.
 • "In crisis? Call or text 988" is always one tap away (US).
 
-FREE, AND ONE-TIME UNLOCK
-The classic 90-second reset, breathing-only and grounding-only resets are free forever.
-A one-time unlock adds box breathing, an extended 3-minute reset, a night reset (extra dim, silent), and My plan: your own note, shown after every reset, and a one-tap call to your person. No subscription.
+FREE
+Everything in Anchor is free: the classic 90-second reset, breathing-only and grounding-only resets, box breathing, an extended 3-minute reset, a night reset (extra dim, silent), and My plan: your own note, shown after every reset, and a one-tap call to your person.
+No subscription. No in-app purchase. Nothing locked.
 
 Anchor is a self-help tool, not a medical device, and not a substitute for professional care. If you are in crisis in the US, call or text 988. Elsewhere, contact your local emergency number.
 ```
@@ -66,7 +66,7 @@ Anchor is a self-help tool, not a medical device, and not a substitute for profe
 - Haptic rhythm you can follow with your eyes closed; optional soft tones.
 - Large text, reduced motion, screen-reader support.
 - History and "What helped?" saved only on your device.
-- One-time unlock (no subscription): extra resets and My plan.
+- Completely free: every reset and My plan. No subscription, no in-app purchase.
 
 ---
 
@@ -77,33 +77,24 @@ Anchor is a self-help tool, not a medical device, and not a substitute for profe
 | Primary category | Health & Fitness |
 | Secondary category | Lifestyle |
 | Keywords (max 100) | `panic,anxiety,breathe,breathing,grounding,calm,5-4-3-2-1,box breathing,sos,offline,private,night` |
-| Price | Free (with in-app purchase) |
+| Price | Free (no in-app purchases) |
 | Privacy Policy URL | `https://YOUR-DOMAIN/privacy.html` |
 | Support URL | `https://YOUR-DOMAIN/` (or a support page) |
 | Copyright | `2026 YOUR NAME` |
 
-**In-app purchase**
-
-| Field | Value |
-|---|---|
-| Type | Non-Consumable |
-| Product ID | `full_unlock` |
-| Reference name | Full unlock |
-| Display name (max 30) | `Full unlock` |
-| Description (max 45) | `More resets and My plan. One-time purchase.` |
-| Price | USD 6.99 (pick the matching price point) |
+**In-app purchases:** none. Don't create any products in App Store Connect.
 
 **Age rating questionnaire:** answer **None** to every content item, including *Medical/Treatment Information*; **No** to unrestricted web access, gambling, contests and user-generated content. Expected rating: **4+**.
 
 **App Privacy — exact answers**
 1. *App Privacy → Get Started*: "Do you or your third-party partners collect data from this app?" → **No, we do not collect data from this app.**
 2. Publish. The product page shows **"Data Not Collected"**.
-3. Why this is true: the app makes no network requests and has no third-party SDKs. Purchases are processed by Apple, and Apple's own data handling isn't the developer's to declare. Data saved on the device (settings, history, My plan) is not "collected", because it never leaves the device.
+3. Why this is true: the app makes no network requests, has no third-party SDKs and sells nothing. Data saved on the device (settings, history, My plan) is not "collected", because it never leaves the device.
 
 **App Review notes (paste into "Notes")**
 ```
-No account or login. Every free feature works immediately and offline (try airplane mode).
-To see the paid content: Library → Box breathing → Unlock (sandbox account), or Restore purchases in Settings.
+No account or login, and no in-app purchases: every feature is free and works immediately
+and offline (try airplane mode). Library has all six resets; My plan is on the Home screen.
 Anchor is a self-help / wellness tool. It makes no medical, diagnostic or treatment claims, collects no data,
 and shows the US 988 crisis line on the Home and Done screens. Deep link for testing: anchor://start
 ```
@@ -118,19 +109,19 @@ and shows the US 988 crisis line on the Home and Done screens. Deep link for tes
 | Contact email | `hello@example.com` → **replace** |
 | Privacy policy | `https://YOUR-DOMAIN/privacy.html` |
 | Ads | **No, my app does not contain ads** |
-| App access | **All functionality is available without special access** (no login; paid content is a normal in-app purchase) |
+| App access | **All functionality is available without special access** (no login, no purchases) |
 | Content rating (IARC) | Category: *Utility, Productivity, Communication or Other*. Answer **No** to violence, sexuality, language, controlled substances, gambling, user interaction/sharing and location sharing. Expected: **Everyone / PEGI 3** |
 | Target audience | Recommended **13+** (13–15, 16–17, 18+). Not under 13, so the Families policy doesn't apply. *Your decision.* |
 | Health apps declaration | Choose the closest **wellness** feature (e.g. stress management / relaxation). Do **not** pick medical device, disease management or clinical categories. *Option names change; check the live form.* |
-| In-app product | `full_unlock`, one-time product, USD 6.99, Active |
+| Monetization | **Free**, no in-app products. Don't create any under *Monetize*. |
 
 **Data safety — exact answers**
 1. "Does your app collect or share any of the required user data types?" → **No**.
 2. The form skips the rest (encryption in transit and data deletion only apply when data is collected).
 3. The store listing shows **"No data collected"** and **"No data shared with third parties"**.
-4. Why this is true: Google counts data as "collected" only when it is sent off the device. Anchor sends nothing. Google Play Billing purchase records are handled by Google Play, not by the app.
+4. Why this is true: Google counts data as "collected" only when it is sent off the device. Anchor sends nothing.
 
-> ⚠ **Android Auto Backup is on** (`android:allowBackup="true"`). This doesn't change the Data safety answer (backups go to the user's own Google account, not to you), and the privacy policy mentions it. If you want "stays on this device" to be literally true, set it to `false`. Trade-off: history and My plan won't survive a phone change. The unlock is restored from Play either way.
+> ⚠ **Android Auto Backup is on** (`android:allowBackup="true"`). This doesn't change the Data safety answer (backups go to the user's own Google account, not to you), and the privacy policy mentions it. If you want "stays on this device" to be literally true, set it to `false`. Trade-off: history and My plan won't survive a phone change.
 
 ---
 
@@ -143,10 +134,10 @@ The same 5 screens, in this order, for both stores. Captions go **above** the de
 | 1 | **Home** | Fresh install, default settings | **Panic attack? One tap.** |
 | 2 | **Reset — breathing** | Classic reset, ~3.5 s in (circle nearly full, "Breathe in") | **Breathe with the circle.** |
 | 3 | **Reset — grounding** | Skip once ("Find 5 things you can see.") | **Come back through your senses.** |
-| 4 | **Done — with My plan** | Unlocked; My plan note "This passes. You are safe." and contact "Sam" (fictional) | **Your words. Your person. One tap.** |
+| 4 | **Done — with My plan** | My plan note "This passes. You are safe." and contact "Sam" (fictional) | **Your words. Your person. One tap.** |
 | 5 | **History** | 4–5 sample resets with "What helped?" answers | **No account. No internet. No one watching.** |
 
-Optional 6th for Play (up to 8 allowed): **Library** — *"Free resets. One-time unlock."*
+Optional 6th for Play (up to 8 allowed): **Library** — *"Six resets. All free."*
 
 **Sizes**
 - Apple: iPhone 6.9" — **1320 × 2868** (1290 × 2796 also accepted). Because the app currently supports **iPad** (`TARGETED_DEVICE_FAMILY = 1,2`), Apple also requires **13" iPad** screenshots (2064 × 2752). Make the app iPhone-only in Xcode to skip them; see the release checklist.
@@ -169,8 +160,6 @@ node -e "for (const [n,max,s] of [
  ['Name',30,'Anchor: Panic Reset'],
  ['Apple subtitle',30,'One tap. 90 seconds. Offline.'],
  ['Google short description',80,'Panic attack? One tap. 90 seconds. No account, no internet, no one watching.'],
- ['IAP display name',30,'Full unlock'],
- ['IAP description',45,'More resets and My plan. One-time purchase.'],
  ['Keywords',100,'panic,anxiety,breathe,breathing,grounding,calm,5-4-3-2-1,box breathing,sos,offline,private,night'],
 ]) console.log((s.length<=max?'ok  ':'OVER')+' '+n.padEnd(26)+s.length+'/'+max)"
 ```

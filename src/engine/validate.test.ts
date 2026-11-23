@@ -6,7 +6,6 @@ const valid: Protocol = {
   id: 'test-protocol',
   name: 'Test protocol',
   description: 'A test.',
-  locked: false,
   approxSeconds: 30,
   phases: [
     { kind: 'breathing', cycles: 1, inhaleSec: 4, holdSec: 2, exhaleSec: 6 },

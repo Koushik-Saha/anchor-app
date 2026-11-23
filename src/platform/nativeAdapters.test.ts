@@ -13,32 +13,8 @@ const mocks = vi.hoisted(() => {
     keepAwake: vi.fn(async () => undefined),
     allowSleep: vi.fn(async () => undefined),
     removeListener: vi.fn(async () => undefined),
-    store: {
-      purchase: vi.fn<() => Promise<{ productIdentifier: string; purchaseState?: string }>>(),
-      owned: [] as { productIdentifier: string; purchaseState?: string; revocationDate?: string }[],
-      restore: vi.fn(async () => undefined),
-      getPurchasesArgs: [] as unknown[],
-      listeners: [] as ((t: { productIdentifier: string; purchaseState?: string }) => void)[],
-    },
   };
 });
-
-vi.mock('@capgo/native-purchases', () => ({
-  PURCHASE_TYPE: { INAPP: 'inapp', SUBS: 'subs' },
-  NativePurchases: {
-    getProduct: async () => ({ product: { priceString: '6,99 €' } }),
-    purchaseProduct: mocks.store.purchase,
-    restorePurchases: mocks.store.restore,
-    getPurchases: async (args: unknown) => {
-      mocks.store.getPurchasesArgs.push(args);
-      return { purchases: mocks.store.owned };
-    },
-    addListener: async (_event: 'transactionUpdated', cb: (t: { productIdentifier: string }) => void) => {
-      mocks.store.listeners.push(cb);
-      return { remove: mocks.removeListener };
-    },
-  },
-}));
 
 vi.mock('@capacitor/preferences', () => ({
   Preferences: {
@@ -75,19 +51,16 @@ beforeEach(() => {
   mocks.prefs.clear();
   mocks.appListeners.length = 0;
   mocks.launchUrl.value = undefined;
-  mocks.store.owned = [];
-  mocks.store.getPurchasesArgs.length = 0;
-  mocks.store.listeners.length = 0;
   vi.clearAllMocks();
 });
 
 describe('Preferences storage backend', () => {
   it('stores Anchor data in Capacitor Preferences (namespaced)', async () => {
     const s = createStorage(native.createPreferencesBackend());
-    await s.setUnlocked(true);
+    await s.savePanicPlan({ note: 'Breathe out slowly.' });
     await s.addHistoryEntry({ at: '2026-11-20T00:00:00.000Z', protocolId: 'classic-90', completed: true });
-    expect(mocks.prefs.get('anchor:v1:unlocked')).toBe('true');
-    expect(await s.isUnlocked()).toBe(true);
+    expect(mocks.prefs.get('anchor:v1:panicPlan')).toBe('{"note":"Breathe out slowly."}');
+    expect(await s.getPanicPlan()).toEqual({ note: 'Breathe out slowly.' });
     expect(await s.getHistory()).toHaveLength(1);
     await s.clearAll();
     expect(mocks.prefs.size).toBe(0);
@@ -141,8 +114,8 @@ describe('installNativeAdapters', () => {
   it('switches every adapter without changing call sites', async () => {
     native.installNativeAdapters();
 
-    await storage.setUnlocked(true); // the app-wide instance now writes to Preferences
-    expect(mocks.prefs.get('anchor:v1:unlocked')).toBe('true');
+    await storage.savePanicPlan({ note: 'Hi' }); // the app-wide instance now writes to Preferences
+    expect(mocks.prefs.get('anchor:v1:panicPlan')).toBe('{"note":"Hi"}');
 
     haptics.setEnabled(true);
     haptics.pulse('phase');
@@ -154,57 +127,5 @@ describe('installNativeAdapters', () => {
 
     mocks.launchUrl.value = { url: 'anchor://start' };
     expect(await deepLinks.getLaunchUrl()).toBe('anchor://start');
-  });
-});
-
-describe('native purchases (StoreKit / Play Billing)', () => {
-  const unlock = { productIdentifier: 'full_unlock' };
-
-  it('reports the localized store price', async () => {
-    expect(await native.createNativePurchases().getUnlockPrice()).toBe('6,99 €');
-  });
-
-  it('purchase: purchased / pending (Android "0") / cancelled / failed', async () => {
-    const store = native.createNativePurchases();
-    mocks.store.purchase.mockResolvedValueOnce({ ...unlock, purchaseState: '1' });
-    expect(await store.purchaseUnlock()).toBe('purchased');
-    mocks.store.purchase.mockResolvedValueOnce({ ...unlock, purchaseState: '0' });
-    expect(await store.purchaseUnlock()).toBe('pending');
-    mocks.store.purchase.mockRejectedValueOnce(new Error('User cancelled'));
-    expect(await store.purchaseUnlock()).toBe('cancelled');
-    mocks.store.purchase.mockRejectedValueOnce(new Error('Network down'));
-    expect(await store.purchaseUnlock()).toBe('failed');
-  });
-
-  it('already owned (Android): verifies ownership instead of failing', async () => {
-    const store = native.createNativePurchases();
-    mocks.store.purchase.mockRejectedValueOnce({ code: 'ITEM_ALREADY_OWNED' });
-    mocks.store.owned = [{ ...unlock, purchaseState: '1' }];
-    expect(await store.purchaseUnlock()).toBe('purchased');
-  });
-
-  it('restore re-syncs with the store, then checks current entitlements only', async () => {
-    const store = native.createNativePurchases();
-    expect(await store.restore()).toBe(false); // fresh account: nothing to restore
-    mocks.store.owned = [unlock];
-    expect(await store.restore()).toBe(true);
-    expect(mocks.store.restore).toHaveBeenCalledTimes(2);
-    expect(mocks.store.getPurchasesArgs.at(-1)).toEqual({ productType: 'inapp', onlyCurrentEntitlements: true });
-  });
-
-  it('a refunded or pending unlock is not treated as owned', async () => {
-    const store = native.createNativePurchases();
-    mocks.store.owned = [{ ...unlock, revocationDate: '2026-11-20T00:00:00Z' }, { ...unlock, purchaseState: '0' }];
-    expect(await store.ownsUnlock()).toBe(false);
-  });
-
-  it('grants the unlock when the store confirms later (transactionUpdated)', async () => {
-    const store = native.createNativePurchases();
-    const granted = vi.fn();
-    store.onUnlockGranted(granted);
-    await Promise.resolve();
-    mocks.store.listeners.forEach((cb) => cb({ productIdentifier: 'other' }));
-    mocks.store.listeners.forEach((cb) => cb({ ...unlock, purchaseState: '1' }));
-    expect(granted).toHaveBeenCalledOnce();
   });
 });
