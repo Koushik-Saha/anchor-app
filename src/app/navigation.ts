@@ -11,7 +11,8 @@ export type Route =
   | { view: 'plan' }
   | { view: 'history' }
   | { view: 'settings' }
-  | { view: 'reset'; protocolId: ProtocolId }
+  /** `runId` changes when a shortcut restarts a reset that is already on screen. */
+  | { view: 'reset'; protocolId: ProtocolId; runId?: number }
   /** Choose a breathing pattern, then start `protocolId` (protocols with `choosePattern`). */
   | { view: 'pattern'; protocolId: ProtocolId }
   /** `completedAt` is the ISO timestamp of the history entry saved for this run. */

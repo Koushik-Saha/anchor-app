@@ -32,6 +32,32 @@ export function routeFromUrl(url: string | null | undefined): Route | null {
   return launchRouteFromSearch(parsed.search);
 }
 
+/** How long after a start the same link is treated as a repeat delivery, not a new tap. */
+export const DUPLICATE_LINK_MS = 1500;
+
+/**
+ * Capacitor can deliver one cold-start link twice (getLaunchUrl, then a retained
+ * appUrlOpen). Without this filter the reset would visibly restart a moment after opening.
+ */
+export function createStartLinkFilter(
+  startedFromLink: boolean,
+  now: () => number = () => performance.now(),
+): () => boolean {
+  let lastStart = startedFromLink ? now() : Number.NEGATIVE_INFINITY;
+  return () => {
+    const at = now();
+    if (at - lastStart < DUPLICATE_LINK_MS) return false;
+    lastStart = at;
+    return true;
+  };
+}
+
+/** A shortcut always begins a new run, even over a reset already on screen. */
+export function freshRunRoute(current: Route, next: Route): Route {
+  if (next.view !== 'reset') return next;
+  return { ...next, runId: (current.view === 'reset' ? (current.runId ?? 0) : 0) + 1 };
+}
+
 /**
  * Reads the launch URL once at startup and strips `action` from the address bar,
  * so a later reload (or the OS restoring the tab) lands on Home instead of

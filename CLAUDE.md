@@ -127,7 +127,7 @@ CI (`.github/workflows/ci.yml`) runs typecheck → lint → test → build → s
 
 - Manifest + service worker are configured in `vite.config.ts` (vite-plugin-pwa, generateSW). Every built file is precached; there is no runtime caching because the app makes no requests.
 - Icons: edit `public/icon.svg` / `public/icon-maskable.svg`, then run `scripts/generate-icons.sh` and commit the PNGs.
-- Launch URL `/?action=start` (manifest shortcut, later `anchor://start`) opens classic-90; handled once in `main.tsx` via `src/app/launch.ts`.
+- One-tap start: the PWA shortcut (`/?action=start`), Android shortcut and iOS quick action (both `anchor://start`) all resolve through `routeFromUrl` in `src/app/launch.ts` to a fresh classic-90, from any screen, including over a running reset (the replaced run is saved as stopped). The manifest lives in `src/app/pwaManifest.ts`.
 - Install hint (`InstallHint`, `src/platform/install.ts`): mobile browsers only, Done screen only, never in the reset flow. The browser's own install banner is suppressed so it can't pop up mid-reset.
 - Release check: `docs/pwa-checklist.md` (Lighthouse **11** — v12+ has no PWA category).
 

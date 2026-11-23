@@ -135,6 +135,11 @@ export function Reset({ protocolId }: { protocolId: ProtocolId }) {
     return () => {
       document.removeEventListener('visibilitychange', onVisibilityChange);
       unsubscribe();
+      // Replaced mid-run by a shortcut: recorded as stopped, the same as Close.
+      const { status } = engine.getState();
+      if (status === 'running' || status === 'paused') {
+        void storage.addHistoryEntry({ at: new Date().toISOString(), protocolId, completed: false });
+      }
       engine.dispose();
       engineRef.current = null;
       void wakeLock.release();

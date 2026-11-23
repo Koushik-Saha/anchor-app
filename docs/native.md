@@ -34,7 +34,8 @@ After **any** web change: `npm run build && npx cap sync` (copies `dist/` into b
 |---|---|
 | Android, from the computer | `adb shell am start -W -a android.intent.action.VIEW -d "anchor://start" app.anchor.reset` |
 | Android, on the phone | Long-press the Anchor icon → **Start reset** |
-| iPhone | Type `anchor://start` in Safari's address bar → **Open**; or Shortcuts app → *Open URLs* → `anchor://start` (add it to the Home Screen or Siri) |
+| iPhone, on the phone | Long-press the Anchor icon → **Start reset** |
+| iPhone, by link | Type `anchor://start` in Safari's address bar → **Open**; or Shortcuts app → *Open URLs* → `anchor://start` (add it to the Home Screen or Siri) |
 
 ## Device test checklist
 
@@ -44,7 +45,7 @@ Run on a real iPhone **and** a real Android phone, using a build made with `npm 
 - [ ] **Android only: the app loads** (the INTERNET permission is removed). A blank screen or `ERR_CACHE_MISS` means the WebView needs it after all — report it.
 - [ ] **Haptics fire** — Settings → Haptics on (you feel a tap). Start a reset: a soft tap at each turn of the breath, a stronger pulse at each phase change, a "success" pattern on Done. Haptics off → nothing.
 - [ ] **Screen stays awake** — set Auto-Lock (iOS) / Screen timeout (Android) to 30 s. Start classic-90: the screen stays on for the whole 93 s. After Done, it sleeps normally again.
-- [ ] **Deep link starts a reset** — (a) app fully closed → `anchor://start` → opens straight into the breathing circle; (b) app open on Home → reset starts; (c) already mid-reset → the running reset continues, not restarted; (d) Android: long-press icon → **Start reset**.
+- [ ] **Deep link starts a reset** — (a) app fully closed → `anchor://start` → opens straight into the breathing circle; (b) app open on Home → reset starts; (c) already mid-reset → a fresh classic reset starts; (d) long-press the icon on Android **and** iPhone → **Start reset**, from closed, from the background and from another screen.
 - [ ] **Airplane mode** — airplane mode on (Wi-Fi off too), force-quit Anchor, open it → full reset to Done → answer "What helped?" → History shows it. Force-quit and reopen → settings and history are still there (stored in Capacitor Preferences).
 - [ ] **Leaving mid-reset** — press Home during a reset, come back → "Welcome back." with Resume / Start over.
 - [ ] **Zero permission prompts** — none at install or during use. Android *Settings → Apps → Anchor → Permissions*: nothing to grant. iOS *Settings → Anchor*: no permission switches.
@@ -65,7 +66,7 @@ Anchor has no in-app purchases and no locked features. There's no store product 
 | | iOS | Android |
 |---|---|---|
 | URL scheme `anchor://` | `ios/App/App/Info.plist` → `CFBundleURLTypes` | `AndroidManifest.xml` → VIEW intent-filter |
-| "Start reset" shortcut | — (use the Shortcuts app) | `res/xml/shortcuts.xml` |
+| "Start reset" shortcut | `Info.plist` → `UIApplicationShortcutItems`, handled in `SceneDelegate.swift` | `res/xml/shortcuts.xml` |
 | Icons | `Assets.xcassets/AppIcon.appiconset` (1024, opaque) | vector adaptive + themed icon (`drawable/ic_launcher_foreground.xml`), PNG legacy icons |
 | Splash | `Splash.imageset` + slate `LaunchScreen.storyboard` | `values/styles.xml` (Android 12+ API, `drawable/splash_icon.xml`), `drawable*/splash.png` |
 | Status bar | light content, `UIUserInterfaceStyle` Dark | `SystemBars`/`StatusBar` DARK, slate bars |

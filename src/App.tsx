@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
-import { routeFromUrl } from './app/launch';
+import { createStartLinkFilter, freshRunRoute, routeFromUrl } from './app/launch';
 import { NavigationContext, type Navigation, type Route } from './app/navigation';
+import * as audio from './platform/audio';
 import * as deepLinks from './platform/deepLinks';
 import { Done } from './screens/Done';
 import { History } from './screens/History';
@@ -16,7 +17,7 @@ function renderRoute(route: Route): ReactElement {
     case 'home':
       return <Home />;
     case 'reset':
-      return <Reset protocolId={route.protocolId} />;
+      return <Reset key={route.runId ?? 0} protocolId={route.protocolId} />;
     case 'pattern':
       return <PatternPicker protocolId={route.protocolId} />;
     case 'done':
@@ -41,16 +42,26 @@ export function App({ initialRoute = { view: 'home' } }: { initialRoute?: Route 
 
   const nav = useMemo(() => ({ route, navigate }), [route, navigate]);
 
-  // anchor://start while the app is already open (Android shortcut, Shortcuts app, link):
-  // jump into a reset — unless one is already running, which is never interrupted.
-  useEffect(
-    () =>
-      deepLinks.onOpenUrl((url) => {
-        const next = routeFromUrl(url);
-        if (next) setRoute((current) => (current.view === 'reset' ? current : next));
-      }),
-    [],
-  );
+  // anchor://start while the app is already open (Android / iOS shortcut, link):
+  // always a fresh classic reset, from any screen, including over a running reset.
+  const startedFromLink = initialRoute.view === 'reset';
+  useEffect(() => {
+    const isNewStart = createStartLinkFilter(startedFromLink);
+    return deepLinks.onOpenUrl((url) => {
+      const next = routeFromUrl(url);
+      if (!next || !isNewStart()) return;
+      audio.prime();
+      setRoute((current) => freshRunRoute(current, next));
+    });
+  }, [startedFromLink]);
+
+  // A shortcut launch has no tap to enable sound, so the first touch afterwards does it.
+  useEffect(() => {
+    if (!startedFromLink) return;
+    const prime = () => audio.prime();
+    window.addEventListener('pointerdown', prime, { once: true });
+    return () => window.removeEventListener('pointerdown', prime);
+  }, [startedFromLink]);
 
   // Each view starts at the top, like a fresh screen — and keyboard / screen-reader focus
   // moves to its heading, so the change is announced and Tab starts from the top.

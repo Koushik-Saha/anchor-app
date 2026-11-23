@@ -5,5 +5,5 @@
     <string name="package_name">app.anchor.reset</string>
     <string name="custom_url_scheme">anchor</string>
     <string name="shortcut_start_short">Start reset</string>
-    <string name="shortcut_start_long">Start a reset</string>
+    <string name="shortcut_start_long">Start reset</string>
 </resources>
