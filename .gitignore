@@ -15,3 +15,6 @@ keystore.properties
 *.p8
 *.p12
 *.mobileprovision
+
+# Claude Code local settings — never commit
+.claude/
